@@ -13,6 +13,7 @@ class DataBase:
     def init_db(self):
         self._register_custom_helpers()
         self._create_user_table()
+        self._insert_default_admin()
 
     def _register_custom_helpers(self):
         self.conn.create_function("uuid", 0, lambda: str(uuid.uuid4()))
@@ -27,7 +28,7 @@ class DataBase:
                     email        VARCHAR(254) UNIQUE NOT NULL,
                     imageData    TEXT DEFAULT ?,                      -- converted to base64
                     passwordHash CHAR(60) NOT NULL,                   -- 60 char lenght specific to bycrypt
-                    role         VARCHAR(10) NOT NULL CHECK (role IN ('buyer', 'seller', 'admin'))
+                    role         VARCHAR(10) NOT NULL CHECK (role IN ('buyer', 'seller', 'admin')),
                     lastLogin    TIMESTAMP DEFAULT NULL
                 )
             """,
@@ -57,3 +58,6 @@ class DataBase:
 
     def close_connection(self):
         self.conn.close()
+
+
+db = DataBase(settings.DATABASE_NAME)
