@@ -2,7 +2,7 @@ import sqlite3
 import uuid
 import bcrypt
 
-from shared import settings
+from . import settings
 
 
 class DataBase:
@@ -20,19 +20,18 @@ class DataBase:
 
     def _create_user_table(self):
         self.cur.execute(
-            """
+            f"""
                 CREATE TABLE IF NOT EXISTS users (
                     id           TEXT PRIMARY KEY DEFAULT (uuid()),
                     fullName     VARCHAR(64) NOT NULL,
                     userName     VARCHAR(24) UNIQUE NOT NULL,
                     email        VARCHAR(254) UNIQUE NOT NULL,
-                    imageData    TEXT DEFAULT ?,                      -- converted to base64
-                    passwordHash CHAR(60) NOT NULL,                   -- 60 char lenght specific to bycrypt
+                    imageData    TEXT DEFAULT '{settings.DEFAULT_USER_AVATAR}',
+                    passwordHash CHAR(60) NOT NULL,
                     role         VARCHAR(10) NOT NULL CHECK (role IN ('buyer', 'seller', 'admin')),
                     lastLogin    TIMESTAMP DEFAULT NULL
                 )
-            """,
-            (settings.DEFAULT_USER_AVATAR,),
+            """
         )
         self.conn.commit()
 
