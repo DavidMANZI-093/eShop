@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <form action="/signup" method="POST">
+      <p><label for="full_name">Full names: </label><input name="full_name" type="text"></p>
+      <p><label for="user_name">Username: </label><input name="user_name" type="text"></p>
+      <p><label for="user_email">Email: </label><input name="user_email" type="email"></p>
+      <p><label for="password">Password: </label><input name="password" type="password"></p>
+
+      <p><label for="profile">Select profile image</label><input name="profile" type="file"></p>
+
+      <fieldset>
+        <p>Choose role:</p>
+        <p><label for="user_role"></label><input name="user_role" type="radio" value="buyer">Buyer</p>
+        <p><label for="user_role"></label><input name="user_role" type="radio" value="seller">Seller</p>
+      </fieldset>
+      <button type="submit">Register</button>
+    </form>
+  
+  </body>
+</html>
