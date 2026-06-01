@@ -13,6 +13,7 @@ class Config:
     DEFAULT_ADMIN_PASS: str = os.environ["DEFAULT_ADMIN_PASS"]
     DEFAULT_ADMIN_EMAIL: str = os.environ["DEFAULT_ADMIN_EMAIL"]
     DEFAULT_USER_AVATAR: str = os.environ["DEFAULT_USER_AVATAR"]
+    APP_SECRET: str = os.environ["APP_SECRET"]
 
 
 settings = Config()
