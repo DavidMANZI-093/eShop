@@ -7,7 +7,7 @@ from . import settings
 
 class DataBase:
     def __init__(self, db_name: str):
-        self.conn = sqlite3.connect(db_name)
+        self.conn = sqlite3.connect(db_name, check_same_thread=False)
         self.cur = self.conn.cursor()
 
     def init_db(self):
