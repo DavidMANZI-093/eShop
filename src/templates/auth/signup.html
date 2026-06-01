@@ -3,25 +3,27 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <link href="css/style.css" rel="stylesheet">
+    <title>Sign Up</title>
   </head>
   <body>
-    <form action="/signup" method="POST">
-      <p><label for="full_name">Full names: </label><input name="full_name" type="text"></p>
-      <p><label for="user_name">Username: </label><input name="user_name" type="text"></p>
-      <p><label for="user_email">Email: </label><input name="user_email" type="email"></p>
-      <p><label for="password">Password: </label><input name="password" type="password"></p>
+    <form action="/auth/signup" method="POST" enctype="multipart/form-data">
+      <p><label for="full_name">Full name: </label><input name="full_name" id="full_name" type="text" required></p>
+      <p><label for="user_name">Username: </label><input name="user_name" id="user_name" type="text" required></p>
+      <p><label for="user_email">Email: </label><input name="user_email" id="user_email" type="email" required></p>
+      <p><label for="password">Password: </label><input name="password" id="password" type="password" autocomplete="new-password" required></p>
+      <p><label for="password_confirm">Confirm password: </label><input name="password_confirm" id="password_confirm" type="password" autocomplete="off" required></p>
 
-      <p><label for="profile">Select profile image</label><input name="profile" type="file"></p>
+      <p><label for="profile">Profile image (15MB max size): </label><input name="profile" id="profile" type="file" accept="image/*"></p>
+      <input name="profile_base64" id="profile_base64" type="hidden">
 
       <fieldset>
-        <p>Choose role:</p>
-        <p><label for="user_role"></label><input name="user_role" type="radio" value="buyer">Buyer</p>
-        <p><label for="user_role"></label><input name="user_role" type="radio" value="seller">Seller</p>
+        <legend>Choose role:</legend>
+        <p><label><input name="user_role" type="radio" value="buyer" required> Buyer</label></p>
+        <p><label><input name="user_role" type="radio" value="seller" required> Seller</label></p>
       </fieldset>
       <button type="submit">Register</button>
     </form>
-  
+
+    <script src="/static/js/auth/signup.js"></script>
   </body>
 </html>
