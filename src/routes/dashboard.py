@@ -1,7 +1,7 @@
 # routes/dashboard.py
 from flask import Blueprint, render_template, session
 
-from ..shared import db
+from ..shared import db, settings
 
 dashboard_bp = Blueprint(
     "dashboard", __name__, template_folder="templates", url_prefix="/dashboard"
@@ -13,10 +13,14 @@ def _user_context():
     if not username:
         return {"user": None, "email": ""}
     db.cur.execute(
-        "SELECT userName, email FROM users WHERE userName = ?", (username,)
+        "SELECT userName, email, imageData FROM users WHERE userName = ?", (username,)
     )
     user = db.cur.fetchone()
-    return {"user": user[0] if user else None, "email": user[1] if user else ""}
+    return {
+        "user": user[0] if user else None,
+        "email": user[1] if user else "",
+        "image": user[2] if user else settings.DEFAULT_USER_AVATAR,
+    }
 
 
 @dashboard_bp.route("/seller")
