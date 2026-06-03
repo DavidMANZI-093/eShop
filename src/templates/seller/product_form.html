@@ -4,6 +4,7 @@
 {% block page_title %}{% if is_edit %}Edit listing{% else %}New listing{% endif %}{% endblock %}
 
 {% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
 {% endblock %}
 

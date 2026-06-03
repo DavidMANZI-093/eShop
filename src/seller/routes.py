@@ -11,6 +11,7 @@ from flask import (
 from src.shared.config import settings
 from src.shared.db import get_db
 from src.shared.decorators import login_required, role_required
+from src.dashboard.queries import fetch_user_context
 
 from .queries import (
     fetch_product_by_id,
@@ -34,13 +35,17 @@ _PER_PAGE = 20
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+def _user_ctx() -> dict:
+    """Full user context required by dashboard/base.html (emailVerified, role,
+    imageData, userName, etc.).  Always call this before render_template."""
+    return fetch_user_context(get_db(), session["user"]) or {}
+
+
 def _seller_id() -> str:
-    """Return the current seller's user ID from the session."""
-    row = get_db().execute(
-        "SELECT id FROM users WHERE userName = ?",
-        (session["user"],),
-    ).fetchone()
-    return row["id"] if row else None
+    """Return the current seller's user ID — extracted from the already-fetched
+    user context to avoid a second DB round-trip."""
+    ctx = _user_ctx()
+    return ctx.get("id")
 
 
 def _seller_context() -> dict:
@@ -60,7 +65,12 @@ def _seller_context() -> dict:
 @role_required("seller")
 def dashboard():
     ctx = _seller_context()
-    return render_template("seller/dashboard.html", **ctx, categories=settings.PRODUCT_CATEGORIES)
+    return render_template(
+        "seller/dashboard.html",
+        **_user_ctx(),
+        **ctx,
+        categories=settings.PRODUCT_CATEGORIES,
+    )
 
 
 # ── Listings list ─────────────────────────────────────────────────────────────
@@ -92,6 +102,7 @@ def listings():
 
     return render_template(
         "seller/products.html",
+        **_user_ctx(),
         products        = products,
         total           = total,
         page            = page,
@@ -136,6 +147,7 @@ def new_listing():
 
     return render_template(
         "seller/product_form.html",
+        **_user_ctx(),
         form       = form,
         errors     = errors,
         categories = settings.PRODUCT_CATEGORIES,
@@ -194,6 +206,7 @@ def edit_listing(product_id):
 
     return render_template(
         "seller/product_form.html",
+        **_user_ctx(),
         form       = form,
         errors     = errors,
         categories = settings.PRODUCT_CATEGORIES,
