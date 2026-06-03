@@ -23,10 +23,21 @@
             {% block sidebar_nav %}{% endblock %}
 
             {% if role == 'seller' %}
+            <a
+                href="{{ url_for('dashboard.seller') }}"
+                class="nav-link{% if request.endpoint == 'dashboard.seller' %} is-active{% endif %}"
+                id="nav-seller-home-link"
+            >
+                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Dashboard
+            </a>
             <div class="nav-section-label">Store</div>
             <a
                 href="{{ url_for('seller.listings') }}"
-                class="nav-link{% if request.endpoint in ('seller.listings', 'seller.new_listing', 'seller.edit_listing') %} is-active{% endif %}"
+                class="nav-link{% if request.endpoint in ('seller.listings', 'seller.edit_listing') %} is-active{% endif %}"
                 id="nav-seller-listings-link"
             >
                 <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -38,7 +49,7 @@
             </a>
             <a
                 href="{{ url_for('seller.new_listing') }}"
-                class="nav-link"
+                class="nav-link{% if request.endpoint == 'seller.new_listing' %} is-active{% endif %}"
                 id="nav-new-listing-link"
             >
                 <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

@@ -8,20 +8,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
 {% endblock %}
 
-{% block sidebar_nav %}
-<a
-    href="{{ url_for('dashboard.seller') }}"
-    class="nav-link is-active"
-    role="listitem"
-    id="nav-seller-home-link"
->
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-    </svg>
-    Dashboard
-</a>
-{% endblock %}
+{% block sidebar_nav %}{% endblock %}
 
 {% block page_title %}Dashboard{% endblock %}
 

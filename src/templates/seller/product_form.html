@@ -117,23 +117,27 @@
 
                 <!-- Image -->
                 <div class="form-section">
-                    <h2 class="form-section-title">Product image</h2>
+                    <h2 class="form-section-title">
+                        Product image
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </h2>
 
-                    <div class="product-image-upload">
+                    <div
+                        class="product-image-upload"
+                        id="image-dropzone"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Upload product image — click or drag and drop"
+                    >
+                        <!-- Preview: shows placeholder until a real image is chosen -->
                         <img
                             id="product-image-preview"
-                            src="{{ form.imageData or '' }}"
+                            src="{{ form.imageData or placeholder_image }}"
                             alt="Product image preview"
                             class="product-image-preview{% if form.imageData %} has-image{% endif %}"
-                            {% if not form.imageData %}
-                            style="display:flex; align-items:center; justify-content:center; cursor:pointer;"
-                            {% else %}
-                            style="cursor:pointer;"
-                            {% endif %}
-                            aria-label="Click to upload a product image"
-                            role="button"
-                            tabindex="0"
                         >
+
+                        <!-- Hidden input — only populated after a file is selected -->
                         <input
                             type="hidden"
                             name="imageData"
@@ -143,30 +147,27 @@
                         <input
                             type="file"
                             id="product-image-input"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
                             class="sr-only"
-                            aria-label="Upload product image"
+                            aria-label="Choose product image file"
                         >
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            id="image-upload-btn"
-                            onclick="document.getElementById('product-image-input').click()"
-                            style="width:100%;"
-                        >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="17 8 12 3 7 8"/>
-                                <line x1="12" y1="3" x2="12" y2="15"/>
-                            </svg>
-                            {{ "Change image" if form.imageData else "Upload image" }}
-                        </button>
-                        {% if errors.imageData %}
-                        <span class="field-error-message" role="alert">{{ errors.imageData }}</span>
-                        {% endif %}
-                        <span style="font-size:var(--text-xs); color:var(--color-text-disabled); text-align:center;">
-                            JPG, PNG or WebP. Max 2 MB.
-                        </span>
+
+                        <div class="image-upload-hint" id="image-upload-hint" aria-live="polite">
+                            {% if form.imageData %}
+                            <span>Image selected — click or drag to replace</span>
+                            {% else %}
+                            <span>Drag &amp; drop or <u>browse</u></span>
+                            {% endif %}
+                        </div>
+
+                        <span
+                            class="field-error-message"
+                            id="imageData-error"
+                            role="alert"
+                            style="{% if not errors.imageData %}visibility:hidden;{% endif %}"
+                        >{{ errors.imageData or 'placeholder' }}</span>
+
+                        <span class="image-upload-meta">JPG, PNG or WebP &nbsp;&middot;&nbsp; Max 2 MB</span>
                     </div>
                 </div>
 

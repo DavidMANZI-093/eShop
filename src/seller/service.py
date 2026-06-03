@@ -183,14 +183,15 @@ def _validate_product_form(form: dict, *, is_edit: bool = False) -> dict:
         except ValueError:
             errors["stock"] = "Stock must be a whole number."
 
-    # imageData — optional, but if provided must be a data URI and within size limit
+    # imageData — required; if provided must be a data URI and within size limit
     image_data = form.get("imageData") or ""
-    if image_data:
-        if not image_data.startswith("data:image/"):
-            errors["imageData"] = "Invalid image format."
-        elif len(image_data) > _MAX_IMAGE_BYTES * 1.4:
-            # base64 inflates by ~1.33×; 1.4× gives a safe upper bound
-            errors["imageData"] = "Image must be under 2 MB."
+    if not image_data:
+        errors["imageData"] = "A product image is required."
+    elif not image_data.startswith("data:image/"):
+        errors["imageData"] = "Invalid image format."
+    elif len(image_data) > _MAX_IMAGE_BYTES * 1.4:
+        # base64 inflates by ~1.33×; 1.4× gives a safe upper bound
+        errors["imageData"] = "Image must be under 2 MB."
 
     # status (edit only, optional field)
     if is_edit:

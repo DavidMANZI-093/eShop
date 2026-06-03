@@ -148,11 +148,12 @@ def new_listing():
     return render_template(
         "seller/product_form.html",
         **_user_ctx(),
-        form       = form,
-        errors     = errors,
-        categories = settings.PRODUCT_CATEGORIES,
-        is_edit    = False,
-        product    = None,
+        form             = form,
+        errors           = errors,
+        categories       = settings.PRODUCT_CATEGORIES,
+        placeholder_image= settings.DEFAULT_PRODUCT_IMAGE,
+        is_edit          = False,
+        product          = None,
     )
 
 
@@ -207,11 +208,12 @@ def edit_listing(product_id):
     return render_template(
         "seller/product_form.html",
         **_user_ctx(),
-        form       = form,
-        errors     = errors,
-        categories = settings.PRODUCT_CATEGORIES,
-        is_edit    = True,
-        product    = product,
+        form             = form,
+        errors           = errors,
+        categories       = settings.PRODUCT_CATEGORIES,
+        placeholder_image= settings.DEFAULT_PRODUCT_IMAGE,
+        is_edit          = True,
+        product          = product,
     )
 
 

@@ -79,5 +79,16 @@ class Config:
         "Other",
     )
 
+    # Placeholder shown in the product image upload field before a real image is
+    # chosen.  Never stored to the DB — the hidden imageData input starts empty.
+    DEFAULT_PRODUCT_IMAGE: str = (
+        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH"
+        "ZpZXdCb3g9Ii00IC00IDMyIDMyIiB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgZmlsbD0ibm9uZSIgc3"
+        "Ryb2tlPSIjNjA2MDYwIiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdH"
+        "Jva2UtbGluZWpvaW49InJvdW5kIj4KICA8cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iMTgiIGhlaWdodD"
+        "0iMTgiIHJ4PSIyIiByeT0iMiIvPgogIDxjaXJjbGUgY3g9IjguNSIgY3k9IjguNSIgcj0iMS41Ii8+Ci"
+        "AgPHBvbHlsaW5lIHBvaW50cz0iMjEgMTUgMTYgMTAgNSAyMSIvPgo8L3N2Zz4="
+    )
+
 
 settings = Config()
