@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Verify your email — eShop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block body %}
+<main class="auth-page" role="main">
+    <div class="auth-card" style="text-align: center;">
+
+        <a href="{{ url_for('auth.login') }}" class="auth-logo-link" aria-label="eShop home"
+           style="display:inline-block; margin-bottom: var(--space-4);">
+            <span class="logo">eShop</span>
+        </a>
+
+        {% if status == 'invalid' %}
+            <h1 class="auth-title">Invalid link</h1>
+            <p class="auth-subtitle" style="margin-bottom: var(--space-5);">
+                This verification link is not valid. It may have been copied incorrectly.
+            </p>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="display:inline-flex;">
+                Back to sign in
+            </a>
+
+        {% elif status == 'expired' %}
+            <h1 class="auth-title">Link expired</h1>
+            <p class="auth-subtitle" style="margin-bottom: var(--space-5);">
+                This verification link expired after 24 hours. Sign in and use the banner
+                to send a fresh link.
+            </p>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="display:inline-flex;">
+                Sign in
+            </a>
+
+        {% elif status == 'used' %}
+            <h1 class="auth-title">Already verified</h1>
+            <p class="auth-subtitle" style="margin-bottom: var(--space-5);">
+                This link has already been used. Your email address is verified.
+            </p>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="display:inline-flex;">
+                Sign in
+            </a>
+
+        {% else %}
+            <h1 class="auth-title">Check your inbox</h1>
+            <p class="auth-subtitle" style="margin-bottom: var(--space-3);">
+                We sent a verification link to your email address.
+                Click the link in that email to verify your account.
+            </p>
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); margin-bottom: var(--space-5);">
+                The link expires in 24 hours. Check your spam folder if you
+                don't see it within a few minutes.
+            </p>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-secondary" style="display:inline-flex;">
+                Back to sign in
+            </a>
+        {% endif %}
+
+    </div>
+</main>
+{% endblock %}

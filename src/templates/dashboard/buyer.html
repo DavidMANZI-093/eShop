@@ -1,17 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <link href="css/style.css" rel="stylesheet">
-  </head>
-  <body>
-    <h1>Buyer Dashboard</h1>
-    <img src={{ image }} width="40" height="40" alt="profile image">
-    <p>Logged in as <strong>{{ user }}</strong> &lt;{{ email }}&gt;</p>
-    <p>Contents coming soon...</p>
-    <a href="/auth/logout">Log out</a>
-  
-  </body>
-</html>
+{% extends "dashboard/base.html" %}
+
+{% block title %}Buyer Dashboard — eShop{% endblock %}
+{% block meta_description %}Your eShop buyer dashboard — browse products and manage orders.{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{{ url_for('dashboard.buyer') }}" class="nav-link is-active" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    Dashboard
+</a>
+<span class="nav-section-label">Shopping</span>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+    Browse products
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+    My orders
+</a>
+{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard-welcome">
+    <p class="dashboard-welcome-eyebrow">Welcome back</p>
+    <h1 class="dashboard-welcome-heading">Hello, {{ fullName.split()[0] }}</h1>
+    <p class="dashboard-welcome-body">
+        Your buyer dashboard is ready. Product browsing, order history,
+        and more are on the way.
+    </p>
+    <a href="#" class="btn btn-primary">Browse products</a>
+</section>
+{% endblock %}

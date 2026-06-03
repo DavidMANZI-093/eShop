@@ -1,0 +1,93 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Delete account — eShop{% endblock %}
+{% block page_title %}Delete account{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="delete-account-page">
+
+    <div class="delete-confirmation-card">
+
+        <div class="delete-confirmation-header">
+            <div class="delete-confirmation-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+            </div>
+            <h1 class="delete-confirmation-title">Delete your account?</h1>
+            <p class="delete-confirmation-body">
+                This will permanently remove <strong style="color: var(--color-text-primary);">{{ fullName }}</strong>'s
+                account and all associated data. There is no way to recover it.
+            </p>
+        </div>
+
+        <form
+            id="delete-account-form"
+            class="delete-confirmation-form"
+            action="{{ url_for('dashboard.delete_account') }}"
+            method="POST"
+            novalidate
+        >
+            {% if has_password %}
+            <div class="field">
+                <label class="field-label" for="password">
+                    Confirm with your password
+                    <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <input
+                    class="field-input{% if delete_error.password %} has-error{% endif %}"
+                    id="password"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="Enter your current password"
+                    required
+                    aria-describedby="password-error"
+                    aria-invalid="{{ 'true' if delete_error.password else 'false' }}"
+                >
+                <span class="field-error-message" id="password-error" role="alert">
+                    {{ delete_error.password or '' }}
+                </span>
+            </div>
+            {% else %}
+            <p style="font-size: var(--text-sm); color: var(--color-text-secondary); line-height: 1.6;">
+                Your account uses Google sign-in and has no password.
+                Click the button below to confirm you want to permanently delete your account.
+            </p>
+            {% endif %}
+
+            <div class="delete-actions">
+                <a
+                    href="{{ url_for('dashboard.profile') }}"
+                    class="btn btn-secondary"
+                    id="cancel-delete-btn"
+                    style="flex:1; text-align:center;"
+                >
+                    Cancel
+                </a>
+                <button
+                    id="confirm-delete-btn"
+                    class="btn btn-danger"
+                    type="submit"
+                    style="flex:1;"
+                >
+                    Yes, delete my account
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard/delete_account.js') }}"></script>
+{% endblock %}

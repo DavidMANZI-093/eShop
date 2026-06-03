@@ -1,17 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <link href="css/style.css" rel="stylesheet">
-  </head>
-  <body>
-    <h1>Seller Dashboard</h1>
-    <img src={{ image }} width="40" height="40" alt="profile image">
-    <p>Logged in as <strong>{{ user }}</strong> &lt;{{ email }}&gt;</p>
-    <p>Contents coming soon...</p>
-    <a href="/auth/logout">Log out</a>
-  
-  </body>
-</html>
+{% extends "dashboard/base.html" %}
+
+{% block title %}Seller Dashboard — eShop{% endblock %}
+{% block meta_description %}Your eShop seller dashboard — manage listings, track sales, and grow your store.{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{{ url_for('dashboard.seller') }}" class="nav-link is-active" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    Dashboard
+</a>
+<span class="nav-section-label">Store</span>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add listing
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+    My listings
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    Sales
+</a>
+{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard-welcome">
+    <p class="dashboard-welcome-eyebrow">Seller dashboard</p>
+    <h1 class="dashboard-welcome-heading">Hello, {{ fullName.split()[0] }}</h1>
+    <p class="dashboard-welcome-body">
+        Your seller workspace is ready. Listing management, sales analytics,
+        and order fulfillment are on the way.
+    </p>
+    <a href="#" class="btn btn-primary">Add your first listing</a>
+</section>
+{% endblock %}

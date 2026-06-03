@@ -1,17 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title></title>
-    <link href="css/style.css" rel="stylesheet">
-  </head>
-  <body>
-    <h1>Admin Dashboard</h1>
-    <img src={{ image }} width="40" height="40" alt="profile image">
-    <p>Logged in as <strong>{{ user }}</strong> &lt;{{ email }}&gt;</p>
-    <p>Contents coming soon...</p>
-    <a href="/auth/logout">Log out</a>
-  
-  </body>
-</html>
+{% extends "dashboard/base.html" %}
+
+{% block title %}Admin Dashboard — eShop{% endblock %}
+{% block meta_description %}eShop admin panel — manage users, listings, and platform settings.{% endblock %}
+
+{% block sidebar_nav %}
+<a href="{{ url_for('dashboard.admin') }}" class="nav-link is-active" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+    </svg>
+    Dashboard
+</a>
+<span class="nav-section-label">Platform</span>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+    Users
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+    </svg>
+    Listings
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    Analytics
+</a>
+<a href="#" class="nav-link" role="listitem">
+    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+        <path d="M12 2v2m0 16v2M2 12h2m16 0h2"/>
+    </svg>
+    Settings
+</a>
+{% endblock %}
+
+{% block page_title %}Admin Panel{% endblock %}
+
+{% block content %}
+<section class="dashboard-welcome">
+    <p class="dashboard-welcome-eyebrow">Admin access</p>
+    <h1 class="dashboard-welcome-heading">Platform overview</h1>
+    <p class="dashboard-welcome-body">
+        User management, listing moderation, analytics, and platform
+        configuration are on the way.
+    </p>
+    <a href="#" class="btn btn-primary">Manage users</a>
+</section>
+{% endblock %}

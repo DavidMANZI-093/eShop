@@ -1,0 +1,294 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Profile — eShop{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+
+    <!-- ========================================================
+         ACCOUNT META CHIPS
+         ======================================================== -->
+    <div class="profile-meta" style="margin-bottom: var(--space-5);">
+        <span class="role-badge role-badge-{{ role }}">{{ role }}</span>
+
+        {% if emailVerified %}
+        <span class="profile-meta-chip profile-meta-chip-verified">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            Email verified
+        </span>
+        {% else %}
+        <span class="profile-meta-chip profile-meta-chip-unverified">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            Email unverified
+        </span>
+        {% endif %}
+
+        {% if googleId %}
+        <span class="profile-meta-chip profile-meta-chip-google">
+            <svg width="11" height="11" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            </svg>
+            Google linked
+        </span>
+        {% endif %}
+
+        {% if createdAt %}
+        <span class="profile-meta-chip">
+            Member since {{ createdAt.strftime('%b %Y') if createdAt else 'N/A' }}
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- ========================================================
+         PROFILE INFO
+         ======================================================== -->
+    <section class="profile-section" aria-labelledby="profile-info-heading">
+        <div class="profile-section-header">
+            <div>
+                <h2 class="profile-section-title" id="profile-info-heading">Personal information</h2>
+                <p class="profile-section-subtitle">Update your name, username, email, and photo</p>
+            </div>
+        </div>
+
+        <form
+            id="profile-info-form"
+            class="profile-section-body"
+            action="{{ url_for('dashboard.profile') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            novalidate
+        >
+            <input type="hidden" name="action" value="update_info">
+
+            <!-- Avatar -->
+            <div class="profile-avatar-row">
+                <img
+                    src="{{ imageData }}"
+                    alt="{{ userName }}'s profile photo"
+                    class="profile-avatar-preview"
+                    id="avatar-preview"
+                    width="72"
+                    height="72"
+                >
+                <input type="hidden" name="profile_base64" id="profile_base64">
+                <input type="file" id="avatar-file-input" accept="image/*" class="sr-only" aria-label="Upload profile photo">
+                <div class="profile-avatar-actions">
+                    <button
+                        type="button"
+                        class="profile-upload-btn"
+                        id="avatar-upload-btn"
+                        onclick="document.getElementById('avatar-file-input').click()"
+                    >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Change photo
+                    </button>
+                    <span class="profile-avatar-hint">JPG, PNG or GIF. Max 2 MB.</span>
+                </div>
+            </div>
+
+            <!-- Full name + username -->
+            <div class="profile-field-row">
+                <div class="field">
+                    <label class="field-label" for="full_name">
+                        Full name <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if profile_errors.full_name %} has-error{% endif %}"
+                        id="full_name"
+                        name="full_name"
+                        type="text"
+                        autocomplete="name"
+                        value="{{ fullName }}"
+                        required
+                        aria-describedby="full_name-error"
+                    >
+                    <span class="field-error-message" id="full_name-error" role="alert">
+                        {{ profile_errors.full_name or '' }}
+                    </span>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="user_name">
+                        Username <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if profile_errors.user_name %} has-error{% endif %}"
+                        id="user_name"
+                        name="user_name"
+                        type="text"
+                        autocomplete="username"
+                        spellcheck="false"
+                        autocapitalize="none"
+                        value="{{ userName }}"
+                        required
+                        aria-describedby="user_name-error"
+                    >
+                    <span class="field-error-message" id="user_name-error" role="alert">
+                        {{ profile_errors.user_name or '' }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field">
+                <label class="field-label" for="email">
+                    Email address <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <input
+                    class="field-input{% if profile_errors.email %} has-error{% endif %}"
+                    id="email"
+                    name="email"
+                    type="email"
+                    autocomplete="email"
+                    value="{{ email }}"
+                    required
+                    aria-describedby="email-error email-note"
+                >
+                <span class="field-error-message" id="email-error" role="alert">
+                    {{ profile_errors.email or '' }}
+                </span>
+                <span id="email-note" style="font-size: var(--text-xs); color: var(--color-text-disabled);">
+                    Changing your email will require re-verification.
+                </span>
+            </div>
+
+            <div class="profile-form-actions">
+                <button id="profile-info-submit" class="btn btn-primary" type="submit">
+                    Save changes
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- ========================================================
+         CHANGE PASSWORD
+         ======================================================== -->
+    {% if hasPassword %}
+    <section class="profile-section" aria-labelledby="change-password-heading">
+        <div class="profile-section-header">
+            <div>
+                <h2 class="profile-section-title" id="change-password-heading">Password</h2>
+                <p class="profile-section-subtitle">Update your sign-in password</p>
+            </div>
+        </div>
+
+        <form
+            id="change-password-form"
+            class="profile-section-body"
+            action="{{ url_for('dashboard.profile') }}"
+            method="POST"
+            novalidate
+        >
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="field">
+                <label class="field-label" for="current_password">
+                    Current password <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <input
+                    class="field-input{% if password_errors.current_password %} has-error{% endif %}"
+                    id="current_password"
+                    name="current_password"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                    aria-describedby="current_password-error"
+                >
+                <span class="field-error-message" id="current_password-error" role="alert">
+                    {{ password_errors.current_password or '' }}
+                </span>
+            </div>
+
+            <div class="profile-field-row">
+                <div class="field">
+                    <label class="field-label" for="new_password">
+                        New password <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if password_errors.new_password %} has-error{% endif %}"
+                        id="new_password"
+                        name="new_password"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                        aria-describedby="new_password-error"
+                    >
+                    <span class="field-error-message" id="new_password-error" role="alert">
+                        {{ password_errors.new_password or '' }}
+                    </span>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="confirm_password">
+                        Confirm password <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if password_errors.confirm_password %} has-error{% endif %}"
+                        id="confirm_password"
+                        name="confirm_password"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                        aria-describedby="confirm_password-error"
+                    >
+                    <span class="field-error-message" id="confirm_password-error" role="alert">
+                        {{ password_errors.confirm_password or '' }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="profile-form-actions">
+                <button id="change-password-submit" class="btn btn-primary" type="submit">
+                    Update password
+                </button>
+            </div>
+        </form>
+    </section>
+    {% endif %}
+
+    <!-- ========================================================
+         DANGER ZONE
+         ======================================================== -->
+    <section class="profile-section profile-section-danger" aria-labelledby="danger-heading">
+        <div class="profile-section-header">
+            <div>
+                <h2 class="profile-section-title" id="danger-heading">Danger zone</h2>
+                <p class="profile-section-subtitle">Permanent and irreversible actions</p>
+            </div>
+        </div>
+        <div class="profile-section-body">
+            <p class="danger-description">
+                Deleting your account permanently removes all your data from eShop.
+                This action cannot be undone.
+            </p>
+            <div>
+                <a
+                    href="{{ url_for('dashboard.delete_account') }}"
+                    class="btn btn-danger"
+                    id="go-to-delete-btn"
+                >
+                    Delete my account
+                </a>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard/profile.js') }}"></script>
+{% endblock %}

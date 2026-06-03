@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Complete your profile — eShop{% endblock %}
+{% block meta_description %}Choose your role to complete your eShop account.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block body %}
+<main class="auth-page" role="main">
+    <div class="auth-card">
+
+        <header class="auth-header">
+            <a href="{{ url_for('auth.login') }}" class="auth-logo-link" aria-label="eShop home">
+                <span class="logo">eShop</span>
+            </a>
+
+            {% if google_data.image_url %}
+            <img
+                src="{{ google_data.image_url }}"
+                alt="{{ google_data.full_name }}'s profile photo from Google"
+                class="avatar avatar-lg"
+                style="margin: 0 auto var(--space-3);"
+                width="56"
+                height="56"
+            >
+            {% endif %}
+
+            <h1 class="auth-title">One last step</h1>
+            <p class="auth-subtitle">
+                Welcome, {{ google_data.full_name.split()[0] if google_data.full_name else 'there' }}.
+                How will you be using eShop?
+            </p>
+        </header>
+
+        <form
+            id="complete-profile-form"
+            class="auth-form"
+            action="{{ url_for('auth.complete_profile') }}"
+            method="POST"
+            novalidate
+        >
+            <div class="auth-form-fields">
+
+                <div class="field">
+                    <span class="field-label" id="role-label">
+                        I want to
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </span>
+                    <div
+                        class="role-selector"
+                        role="radiogroup"
+                        aria-labelledby="role-label"
+                        aria-describedby="user_role-error"
+                    >
+                        <div class="role-option">
+                            <input
+                                type="radio"
+                                id="role_buyer"
+                                name="user_role"
+                                value="buyer"
+                            >
+                            <label
+                                for="role_buyer"
+                                class="role-option-label{% if errors.user_role %} has-error{% endif %}"
+                            >
+                                <span class="role-option-name">Buy</span>
+                                <span class="role-option-desc">Browse and purchase products</span>
+                            </label>
+                        </div>
+                        <div class="role-option">
+                            <input
+                                type="radio"
+                                id="role_seller"
+                                name="user_role"
+                                value="seller"
+                            >
+                            <label
+                                for="role_seller"
+                                class="role-option-label{% if errors.user_role %} has-error{% endif %}"
+                            >
+                                <span class="role-option-name">Sell</span>
+                                <span class="role-option-desc">List and manage products</span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="field-error-message" id="user_role-error" role="alert">
+                        {{ errors.user_role or '' }}
+                    </span>
+                </div>
+
+            </div>
+
+            <button
+                id="complete-profile-submit"
+                class="btn btn-primary btn-lg btn-full"
+                type="submit"
+            >
+                Get started
+            </button>
+        </form>
+
+    </div>
+</main>
+{% endblock %}

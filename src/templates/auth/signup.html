@@ -1,30 +1,256 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign Up</title>
-  </head>
-  <body>
-    <form action="/auth/signup" method="POST" enctype="multipart/form-data">
-      <p><label for="full_name">Full name: </label><input name="full_name" id="full_name" type="text" required></p>
-      <p><label for="user_name">Username: </label><input name="user_name" id="user_name" type="text" required></p>
-      <p><label for="user_email">Email: </label><input name="user_email" id="user_email" type="email" required></p>
-      <p><label for="password">Password: </label><input name="password" id="password" type="password" autocomplete="new-password" required></p>
-      <p><label for="password_confirm">Confirm password: </label><input name="password_confirm" id="password_confirm" type="password" autocomplete="off" required></p>
+{% extends "base.html" %}
 
-      <p><label for="profile">Profile image (15MB max size): </label><input name="profile" id="profile" type="file" accept="image/*"></p>
-      <input name="profile_base64" id="profile_base64" type="hidden">
+{% block title %}Create account — eShop{% endblock %}
+{% block meta_description %}Create your eShop account to start buying or selling products.{% endblock %}
 
-      <fieldset>
-        <legend>Choose role:</legend>
-        <p><label><input name="user_role" type="radio" value="buyer" required> Buyer</label></p>
-        <p><label><input name="user_role" type="radio" value="seller" required> Seller</label></p>
-      </fieldset>
-      <button type="submit">Register</button>
-    </form>
-    <a href="/auth/login">Already registered?</a>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
 
-    <script src="/static/js/auth/signup.js"></script>
-  </body>
-</html>
+{% block body %}
+<main class="auth-page" role="main">
+    <div class="auth-card" style="max-width: 500px;">
+
+        <header class="auth-header">
+            <a href="{{ url_for('auth.login') }}" class="auth-logo-link" aria-label="eShop home">
+                <span class="logo">eShop</span>
+            </a>
+            <h1 class="auth-title">Create your account</h1>
+            <p class="auth-subtitle">Join eShop as a buyer or seller</p>
+        </header>
+
+        <form
+            id="signup-form"
+            class="auth-form"
+            action="{{ url_for('auth.signup') }}"
+            method="POST"
+            novalidate
+        >
+            <div class="auth-form-fields">
+
+                <!-- Profile image -->
+                <div class="field">
+                    <span class="field-label">Profile photo</span>
+                    <div class="profile-upload-area">
+                        <div class="profile-preview-container">
+                            <img
+                                id="profile-preview"
+                                class="profile-preview"
+                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjNDQ0NDVhIj48cGF0aCBkPSJNMTIgMTJhNSA1IDAgMSAwIDAtMTAgNSA1IDAgMCAwIDAgMTB6bTAgMmMtNC40MiAwLTggMy41OC04IDh2MWgxNnYtMWMwLTQuNDItMy41OC04LTgtOHoiLz48L3N2Zz4="
+                                alt="Profile preview"
+                                width="56"
+                                height="56"
+                            >
+                        </div>
+                        <div class="profile-upload-trigger">
+                            <label class="profile-upload-btn" for="profile" role="button">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                Upload photo
+                            </label>
+                            <input
+                                id="profile"
+                                name="profile"
+                                type="file"
+                                accept="image/*"
+                                class="sr-only"
+                                aria-describedby="profile-hint"
+                            >
+                            <input id="profile_base64" name="profile_base64" type="hidden">
+                            <span class="profile-upload-hint" id="profile-hint">
+                                Optional. JPEG or PNG, up to 15 MB.
+                            </span>
+                            <span class="field-error-message" id="profile-error" role="alert"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Name row -->
+                <div class="field-row">
+                    <div class="field">
+                        <label class="field-label" for="full_name">
+                            Full name
+                            <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            class="field-input{% if errors.full_name %} has-error{% endif %}"
+                            id="full_name"
+                            name="full_name"
+                            type="text"
+                            autocomplete="name"
+                            required
+                            maxlength="64"
+                            value="{{ form.full_name or '' }}"
+                            aria-describedby="full_name-error"
+                            aria-invalid="{{ 'true' if errors.full_name else 'false' }}"
+                        >
+                        <span class="field-error-message" id="full_name-error" role="alert">
+                            {{ errors.full_name or '' }}
+                        </span>
+                    </div>
+
+                    <div class="field">
+                        <label class="field-label" for="user_name">
+                            Username
+                            <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            class="field-input{% if errors.user_name %} has-error{% endif %}"
+                            id="user_name"
+                            name="user_name"
+                            type="text"
+                            autocomplete="username"
+                            spellcheck="false"
+                            autocapitalize="none"
+                            required
+                            maxlength="24"
+                            value="{{ form.user_name or '' }}"
+                            aria-describedby="user_name-error"
+                            aria-invalid="{{ 'true' if errors.user_name else 'false' }}"
+                        >
+                        <span class="field-error-message" id="user_name-error" role="alert">
+                            {{ errors.user_name or '' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                    <label class="field-label" for="user_email">
+                        Email
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if errors.user_email %} has-error{% endif %}"
+                        id="user_email"
+                        name="user_email"
+                        type="email"
+                        autocomplete="email"
+                        required
+                        value="{{ form.user_email or '' }}"
+                        aria-describedby="user_email-error"
+                        aria-invalid="{{ 'true' if errors.user_email else 'false' }}"
+                    >
+                    <span class="field-error-message" id="user_email-error" role="alert">
+                        {{ errors.user_email or '' }}
+                    </span>
+                </div>
+
+                <!-- Password -->
+                <div class="field">
+                    <label class="field-label" for="password">
+                        Password
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if errors.password %} has-error{% endif %}"
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                        aria-describedby="password-error"
+                        aria-invalid="{{ 'true' if errors.password else 'false' }}"
+                    >
+                    <span class="field-error-message" id="password-error" role="alert">
+                        {{ errors.password or '' }}
+                    </span>
+                </div>
+
+                <!-- Confirm password -->
+                <div class="field">
+                    <label class="field-label" for="password_confirm">
+                        Confirm password
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </label>
+                    <input
+                        class="field-input{% if errors.password_confirm %} has-error{% endif %}"
+                        id="password_confirm"
+                        name="password_confirm"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                        aria-describedby="password_confirm-error"
+                        aria-invalid="{{ 'true' if errors.password_confirm else 'false' }}"
+                    >
+                    <span class="field-error-message" id="password_confirm-error" role="alert">
+                        {{ errors.password_confirm or '' }}
+                    </span>
+                </div>
+
+                <!-- Role selection -->
+                <div class="field">
+                    <span class="field-label" id="role-label">
+                        I want to
+                        <span class="required-mark" aria-hidden="true">*</span>
+                    </span>
+                    <div
+                        class="role-selector"
+                        role="radiogroup"
+                        aria-labelledby="role-label"
+                        aria-describedby="user_role-error"
+                    >
+                        <div class="role-option">
+                            <input
+                                type="radio"
+                                id="role_buyer"
+                                name="user_role"
+                                value="buyer"
+                                {% if form.user_role == 'buyer' %}checked{% endif %}
+                            >
+                            <label
+                                for="role_buyer"
+                                class="role-option-label{% if errors.user_role %} has-error{% endif %}"
+                            >
+                                <span class="role-option-name">Buy</span>
+                                <span class="role-option-desc">Browse and purchase products</span>
+                            </label>
+                        </div>
+                        <div class="role-option">
+                            <input
+                                type="radio"
+                                id="role_seller"
+                                name="user_role"
+                                value="seller"
+                                {% if form.user_role == 'seller' %}checked{% endif %}
+                            >
+                            <label
+                                for="role_seller"
+                                class="role-option-label{% if errors.user_role %} has-error{% endif %}"
+                            >
+                                <span class="role-option-name">Sell</span>
+                                <span class="role-option-desc">List and manage products</span>
+                            </label>
+                        </div>
+                    </div>
+                    <span class="field-error-message" id="user_role-error" role="alert">
+                        {{ errors.user_role or '' }}
+                    </span>
+                </div>
+
+            </div>
+
+            <button
+                id="signup-submit"
+                class="btn btn-primary btn-lg btn-full"
+                type="submit"
+            >
+                Create account
+            </button>
+        </form>
+
+        <footer class="auth-footer" style="margin-top: var(--space-4);">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}">Sign in</a>
+        </footer>
+
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth/signup.js') }}"></script>
+{% endblock %}

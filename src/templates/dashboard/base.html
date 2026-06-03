@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% block dashboard_extra_css %}{% endblock %}
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-layout">
+
+    <!-- =============================================
+         SIDEBAR
+         ============================================= -->
+    <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+
+        <div class="sidebar-header">
+            <a href="{{ url_for('auth.login') }}" aria-label="eShop home">
+                <span class="logo sidebar-logo">eShop</span>
+            </a>
+        </div>
+
+        <div class="sidebar-nav" role="list">
+            {% block sidebar_nav %}{% endblock %}
+
+            <div class="nav-section-label">Account</div>
+            <a
+                href="{{ url_for('dashboard.profile') }}"
+                class="nav-link{% if request.endpoint == 'dashboard.profile' %} is-active{% endif %}"
+                id="nav-profile-link"
+            >
+                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Profile
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <img
+                    src="{{ imageData }}"
+                    alt="{{ userName }}'s profile photo"
+                    class="avatar avatar-md"
+                    width="40"
+                    height="40"
+                >
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">{{ userName }}</span>
+                    <span class="sidebar-user-role">
+                        <span class="role-badge role-badge-{{ role }}">{{ role }}</span>
+                    </span>
+                </div>
+            </div>
+            <a
+                href="{{ url_for('auth.logout') }}"
+                class="nav-link"
+                id="logout-link"
+            >
+                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign out
+            </a>
+        </div>
+
+    </nav>
+
+    <!-- =============================================
+         MAIN CONTENT
+         ============================================= -->
+    <div class="main-content">
+
+        <!-- Email verification banner -->
+        {% if not emailVerified %}
+        <div
+            class="verification-banner"
+            id="verification-banner"
+            role="alert"
+            aria-live="polite"
+        >
+            <div class="verification-banner-text">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Your email address is not verified. Check your inbox for the verification link.
+            </div>
+            <div class="verification-banner-actions">
+                <form action="{{ url_for('auth.resend_verification') }}" method="POST" style="display:inline;">
+                    <button
+                        type="submit"
+                        class="verification-banner-resend"
+                        id="resend-verification-btn"
+                    >Resend email</button>
+                </form>
+                <button
+                    class="verification-banner-dismiss"
+                    id="dismiss-verification-banner"
+                    aria-label="Dismiss verification notice"
+                    type="button"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <header class="main-topbar">
+            <h2 class="topbar-title">{% block page_title %}{% endblock %}</h2>
+            <div class="topbar-actions">
+                {% block topbar_actions %}{% endblock %}
+            </div>
+        </header>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="dashboard-flash">
+                {% for category, message in messages %}
+                <div class="dashboard-flash-message dashboard-flash-message-{{ category }}" role="status">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+
+        <main class="main-body" role="main">
+            {% block content %}{% endblock %}
+        </main>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if not emailVerified %}
+<script src="{{ url_for('static', filename='js/dashboard/verification_banner.js') }}"></script>
+{% endif %}
+{% endblock %}
