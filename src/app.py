@@ -19,9 +19,11 @@ def create_app():
 
     from src.auth.routes import auth_bp
     from src.dashboard.routes import dashboard_bp
+    from src.seller.routes import seller_bp
 
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
+    app.register_blueprint(auth_bp,       url_prefix="/auth")
+    app.register_blueprint(dashboard_bp,  url_prefix="/dashboard")
+    app.register_blueprint(seller_bp,     url_prefix="/seller")
 
     @app.route("/")
     def home():

@@ -63,5 +63,21 @@ class Config:
     GOOGLE_CLIENT_ID:     str = os.environ.get("GOOGLE_CLIENT_ID",     "")
     GOOGLE_CLIENT_SECRET: str = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 
+    # Product categories — displayed in listing forms and used for validation
+    PRODUCT_CATEGORIES: tuple = (
+        "Electronics",
+        "Clothing & Apparel",
+        "Home & Garden",
+        "Books & Media",
+        "Sports & Outdoors",
+        "Health & Beauty",
+        "Toys & Games",
+        "Food & Groceries",
+        "Automotive",
+        "Arts & Crafts",
+        "Pet Supplies",
+        "Other",
+    )
+
 
 settings = Config()

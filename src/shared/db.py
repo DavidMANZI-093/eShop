@@ -77,7 +77,36 @@ def _create_tables(db):
         )
         """
     )
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS products (
+            id          TEXT PRIMARY KEY DEFAULT (uuid()),
+            title       VARCHAR(128)  NOT NULL,
+            description TEXT          NOT NULL,
+            price       REAL          NOT NULL CHECK(price >= 0),
+            category    TEXT          NOT NULL,
+            imageData   TEXT,
+            stock       INTEGER       NOT NULL DEFAULT 0 CHECK(stock >= 0),
+            status      TEXT          NOT NULL DEFAULT 'active'
+                            CHECK(status IN ('active', 'inactive', 'archived')),
+            sellerId    TEXT          NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            createdAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    db.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS products_update_timestamp
+        AFTER UPDATE ON products
+        FOR EACH ROW
+        BEGIN
+            UPDATE products SET updatedAt = CURRENT_TIMESTAMP WHERE id = OLD.id;
+        END
+        """
+    )
     db.commit()
+
 
 
 def _migrate_tables(db):
@@ -85,6 +114,7 @@ def _migrate_tables(db):
     _add_column_if_missing(db, "users", "emailVerified", "INTEGER NOT NULL DEFAULT 0")
     _add_column_if_missing(db, "users", "googleId",      "TEXT UNIQUE DEFAULT NULL")
     _add_column_if_missing(db, "users", "createdAt",     "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    # products table is created via CREATE TABLE IF NOT EXISTS — no column migrations needed yet
 
 
 def _add_column_if_missing(db, table, column, definition):

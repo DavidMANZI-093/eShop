@@ -1,0 +1,285 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{% if is_edit %}Edit listing{% else %}New listing{% endif %} — eShop{% endblock %}
+{% block page_title %}{% if is_edit %}Edit listing{% else %}New listing{% endif %}{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="product-form-page">
+
+    <form
+        id="product-form"
+        action="{% if is_edit %}{{ url_for('seller.edit_listing', product_id=product.id) }}{% else %}{{ url_for('seller.new_listing') }}{% endif %}"
+        method="POST"
+        enctype="multipart/form-data"
+        novalidate
+    >
+        <div class="product-form-layout">
+
+            <!-- ================================================
+                 MAIN COLUMN — title, description, category
+                 ================================================ -->
+            <div class="product-form-main">
+
+                <!-- Basic info -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Product information</h2>
+
+                    <!-- Title -->
+                    <div class="field">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                            <label class="field-label" for="title">
+                                Title <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                            <span id="title-counter" class="char-counter" aria-live="polite"></span>
+                        </div>
+                        <input
+                            class="field-input{% if errors.title %} has-error{% endif %}"
+                            id="title"
+                            name="title"
+                            type="text"
+                            maxlength="128"
+                            placeholder="Give your product a clear, descriptive title"
+                            value="{{ form.title or '' }}"
+                            required
+                            autocomplete="off"
+                            aria-describedby="title-error"
+                            aria-invalid="{{ 'true' if errors.title else 'false' }}"
+                        >
+                        <span class="field-error-message" id="title-error" role="alert">
+                            {{ errors.title or '' }}
+                        </span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="field">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                            <label class="field-label" for="description">
+                                Description <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                            <span id="desc-counter" class="char-counter" aria-live="polite"></span>
+                        </div>
+                        <textarea
+                            class="field-input{% if errors.description %} has-error{% endif %}"
+                            id="description"
+                            name="description"
+                            rows="8"
+                            maxlength="5000"
+                            placeholder="Describe your product: features, condition, dimensions, etc."
+                            required
+                            aria-describedby="description-error"
+                            aria-invalid="{{ 'true' if errors.description else 'false' }}"
+                            style="resize: vertical; min-height: 140px;"
+                        >{{ form.description or '' }}</textarea>
+                        <span class="field-error-message" id="description-error" role="alert">
+                            {{ errors.description or '' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Category</h2>
+
+                    {% if errors.category %}
+                    <span class="field-error-message" role="alert" style="display:block; margin-bottom: var(--space-2);">
+                        {{ errors.category }}
+                    </span>
+                    {% endif %}
+
+                    <div class="category-grid" role="group" aria-label="Select a category" aria-required="true">
+                        {% for cat in categories %}
+                        <div class="category-pill">
+                            <input
+                                type="radio"
+                                name="category"
+                                id="cat-{{ loop.index }}"
+                                value="{{ cat }}"
+                                {% if (form.category or '') == cat %}checked{% endif %}
+                                required
+                            >
+                            <label for="cat-{{ loop.index }}">{{ cat }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================================================
+                 ASIDE — image, price, stock, status, submit
+                 ================================================ -->
+            <div class="product-form-aside">
+
+                <!-- Image -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Product image</h2>
+
+                    <div class="product-image-upload">
+                        <img
+                            id="product-image-preview"
+                            src="{{ form.imageData or '' }}"
+                            alt="Product image preview"
+                            class="product-image-preview{% if form.imageData %} has-image{% endif %}"
+                            {% if not form.imageData %}
+                            style="display:flex; align-items:center; justify-content:center; cursor:pointer;"
+                            {% else %}
+                            style="cursor:pointer;"
+                            {% endif %}
+                            aria-label="Click to upload a product image"
+                            role="button"
+                            tabindex="0"
+                        >
+                        <input
+                            type="hidden"
+                            name="imageData"
+                            id="imageData"
+                            value="{{ form.imageData or '' }}"
+                        >
+                        <input
+                            type="file"
+                            id="product-image-input"
+                            accept="image/*"
+                            class="sr-only"
+                            aria-label="Upload product image"
+                        >
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="image-upload-btn"
+                            onclick="document.getElementById('product-image-input').click()"
+                            style="width:100%;"
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            {{ "Change image" if form.imageData else "Upload image" }}
+                        </button>
+                        {% if errors.imageData %}
+                        <span class="field-error-message" role="alert">{{ errors.imageData }}</span>
+                        {% endif %}
+                        <span style="font-size:var(--text-xs); color:var(--color-text-disabled); text-align:center;">
+                            JPG, PNG or WebP. Max 2 MB.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Pricing & stock -->
+                <div class="form-section">
+                    <h2 class="form-section-title">Pricing &amp; stock</h2>
+
+                    <!-- Price -->
+                    <div class="field">
+                        <label class="field-label" for="price">
+                            Price (R) <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <div class="price-input-wrap">
+                            <span class="price-prefix" aria-hidden="true">R</span>
+                            <input
+                                class="field-input{% if errors.price %} has-error{% endif %}"
+                                id="price"
+                                name="price"
+                                type="number"
+                                inputmode="decimal"
+                                min="0"
+                                max="999999.99"
+                                step="0.01"
+                                placeholder="0.00"
+                                value="{{ form.price or '' }}"
+                                required
+                                aria-describedby="price-error"
+                                aria-invalid="{{ 'true' if errors.price else 'false' }}"
+                            >
+                        </div>
+                        <span class="field-error-message" id="price-error" role="alert">
+                            {{ errors.price or '' }}
+                        </span>
+                    </div>
+
+                    <!-- Stock -->
+                    <div class="field">
+                        <label class="field-label" for="stock">
+                            Stock quantity <span class="required-mark" aria-hidden="true">*</span>
+                        </label>
+                        <input
+                            class="field-input{% if errors.stock %} has-error{% endif %}"
+                            id="stock"
+                            name="stock"
+                            type="number"
+                            inputmode="numeric"
+                            min="0"
+                            max="99999"
+                            step="1"
+                            placeholder="0"
+                            value="{{ form.stock or '' }}"
+                            required
+                            aria-describedby="stock-error"
+                            aria-invalid="{{ 'true' if errors.stock else 'false' }}"
+                        >
+                        <span class="field-error-message" id="stock-error" role="alert">
+                            {{ errors.stock or '' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Status (edit only) -->
+                {% if is_edit %}
+                <div class="form-section">
+                    <h2 class="form-section-title">Visibility</h2>
+
+                    <div class="status-toggle-row">
+                        <span class="status-toggle-label">
+                            Active listings are visible to buyers.
+                            Inactive listings are hidden from the storefront.
+                        </span>
+                        <label class="toggle-switch" for="status-toggle" aria-label="Toggle listing active status">
+                            <input
+                                type="checkbox"
+                                id="status-toggle"
+                                name="status"
+                                value="active"
+                                {% if (form.status or 'active') == 'active' %}checked{% endif %}
+                            >
+                            <span class="toggle-track"></span>
+                        </label>
+                    </div>
+                    <!-- When unchecked, submit 'inactive' -->
+                    <input type="hidden" name="_status_fallback" value="inactive">
+                </div>
+                {% endif %}
+
+                <!-- Submit -->
+                <div class="form-section" style="border:none; background:transparent; padding:0;">
+                    <div class="product-form-actions">
+                        <button
+                            id="product-submit"
+                            type="submit"
+                            class="btn btn-primary"
+                            style="flex:1;"
+                        >
+                            {% if is_edit %}Save changes{% else %}Publish listing{% endif %}
+                        </button>
+                        <a
+                            href="{{ url_for('seller.listings') }}"
+                            class="btn btn-secondary"
+                            id="cancel-form-btn"
+                        >Cancel</a>
+                    </div>
+                </div>
+
+            </div><!-- /.product-form-aside -->
+
+        </div><!-- /.product-form-layout -->
+    </form>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/seller/product_form.js') }}"></script>
+{% endblock %}

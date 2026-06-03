@@ -52,7 +52,20 @@ def buyer():
 @login_required
 @role_required("seller")
 def seller():
-    return render_template("dashboard/seller.html", **_user_context())
+    from src.seller.queries import fetch_recent_listings, fetch_seller_stats
+
+    ctx     = _user_context()
+    db      = get_db()
+    user_id = ctx.get("id")
+    stats   = fetch_seller_stats(db, user_id)    if user_id else {}
+    recent  = fetch_recent_listings(db, user_id) if user_id else []
+
+    return render_template(
+        "dashboard/seller.html",
+        **ctx,
+        stats           = stats,
+        recent_listings = recent,
+    )
 
 
 @dashboard_bp.route("/admin")

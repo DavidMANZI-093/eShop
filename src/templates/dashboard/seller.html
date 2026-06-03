@@ -1,48 +1,157 @@
 {% extends "dashboard/base.html" %}
 
 {% block title %}Seller Dashboard — eShop{% endblock %}
-{% block meta_description %}Your eShop seller dashboard — manage listings, track sales, and grow your store.{% endblock %}
+{% block meta_description %}Your eShop seller dashboard — manage listings, track stock, and grow your store.{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
+{% endblock %}
 
 {% block sidebar_nav %}
-<a href="{{ url_for('dashboard.seller') }}" class="nav-link is-active" role="listitem">
+<a
+    href="{{ url_for('dashboard.seller') }}"
+    class="nav-link is-active"
+    role="listitem"
+    id="nav-seller-home-link"
+>
     <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
         <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
     </svg>
     Dashboard
 </a>
-<span class="nav-section-label">Store</span>
-<a href="#" class="nav-link" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-    Add listing
-</a>
-<a href="#" class="nav-link" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
-        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-    </svg>
-    My listings
-</a>
-<a href="#" class="nav-link" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-    </svg>
-    Sales
-</a>
 {% endblock %}
 
 {% block page_title %}Dashboard{% endblock %}
 
+{% block topbar_actions %}
+<a href="{{ url_for('seller.new_listing') }}" class="btn btn-primary" id="new-listing-topbar-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    New listing
+</a>
+{% endblock %}
+
 {% block content %}
-<section class="dashboard-welcome">
-    <p class="dashboard-welcome-eyebrow">Seller dashboard</p>
-    <h1 class="dashboard-welcome-heading">Hello, {{ fullName.split()[0] }}</h1>
-    <p class="dashboard-welcome-body">
-        Your seller workspace is ready. Listing management, sales analytics,
-        and order fulfillment are on the way.
-    </p>
-    <a href="#" class="btn btn-primary">Add your first listing</a>
-</section>
+<div class="seller-page">
+
+    <!-- ================================================
+         WELCOME
+         ================================================ -->
+    <section class="dashboard-welcome" aria-labelledby="seller-welcome-heading">
+        <p class="dashboard-welcome-eyebrow">Seller dashboard</p>
+        <h1 class="dashboard-welcome-heading" id="seller-welcome-heading">
+            Hello, {{ fullName.split()[0] }}
+        </h1>
+        <p class="dashboard-welcome-body">
+            Manage your listings, track stock levels, and keep your store running smoothly.
+        </p>
+    </section>
+
+    <!-- ================================================
+         STATS STRIP
+         ================================================ -->
+    <div class="stats-strip" aria-label="Store statistics">
+        <div class="stat-card">
+            <span class="stat-card-value" id="stat-total">{{ stats.total or 0 }}</span>
+            <span class="stat-card-label">Total listings</span>
+        </div>
+        <div class="stat-card stat-card-active">
+            <span class="stat-card-value" id="stat-active">{{ stats.active or 0 }}</span>
+            <span class="stat-card-label">Active</span>
+        </div>
+        <div class="stat-card stat-card-inactive">
+            <span class="stat-card-value" id="stat-inactive">{{ stats.inactive or 0 }}</span>
+            <span class="stat-card-label">Inactive</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-value" id="stat-stock">{{ stats.totalStock or 0 }}</span>
+            <span class="stat-card-label">Units in stock</span>
+        </div>
+    </div>
+
+    <!-- ================================================
+         RECENT LISTINGS
+         ================================================ -->
+    <div style="margin-top: var(--space-5);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: var(--space-3);">
+            <h2 style="font-size: var(--text-base); font-weight: 600; color: var(--color-text-primary);">
+                Recent listings
+            </h2>
+            <a href="{{ url_for('seller.listings') }}" class="btn btn-secondary" style="height:32px; font-size:var(--text-sm);" id="view-all-listings-btn">
+                View all
+            </a>
+        </div>
+
+        {% if recent_listings %}
+        <div class="products-table-wrap">
+            <table class="recent-listings-table" aria-label="Recent product listings">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in recent_listings %}
+                    <tr id="recent-product-{{ product.id }}">
+                        <td>
+                            <a
+                                href="{{ url_for('seller.edit_listing', product_id=product.id) }}"
+                                style="font-weight:500; color:var(--color-text-primary); text-decoration:none;"
+                                id="recent-product-link-{{ product.id }}"
+                            >{{ product.title }}</a>
+                            <div style="font-size:var(--text-xs); color:var(--color-text-disabled); margin-top:2px;">
+                                {{ product.category }}
+                            </div>
+                        </td>
+                        <td style="font-variant-numeric:tabular-nums; font-weight:600;">
+                            R {{ "%.2f"|format(product.price) }}
+                        </td>
+                        <td>
+                            {% if product.stock == 0 %}
+                            <span class="stock-badge stock-badge-out">Out of stock</span>
+                            {% elif product.stock <= 5 %}
+                            <span class="stock-badge stock-badge-low">{{ product.stock }} left</span>
+                            {% else %}
+                            <span class="stock-badge stock-badge-ok">{{ product.stock }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-badge-{{ product.status }}">
+                                {{ product.status | capitalize }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <!-- Empty state for new sellers -->
+        <div class="products-table-wrap">
+            <div class="empty-state" id="seller-empty-state">
+                <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                <h2 class="empty-state-title">No listings yet</h2>
+                <p class="empty-state-body">
+                    Create your first product listing to start selling.
+                    It will appear here as soon as it is published.
+                </p>
+                <a href="{{ url_for('seller.new_listing') }}" class="btn btn-primary" id="first-listing-cta-btn">
+                    Add your first listing
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
 {% endblock %}

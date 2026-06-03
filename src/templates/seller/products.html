@@ -1,0 +1,346 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}My Listings — eShop{% endblock %}
+{% block page_title %}My Listings{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seller.css') }}">
+{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('seller.new_listing') }}" class="btn btn-primary" id="new-listing-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    New listing
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="seller-page">
+
+    <!-- ================================================
+         STATS STRIP
+         ================================================ -->
+    <div class="stats-strip" aria-label="Listing statistics">
+        <div class="stat-card">
+            <span class="stat-card-value">{{ stats.total or 0 }}</span>
+            <span class="stat-card-label">Total listings</span>
+        </div>
+        <div class="stat-card stat-card-active">
+            <span class="stat-card-value">{{ stats.active or 0 }}</span>
+            <span class="stat-card-label">Active</span>
+        </div>
+        <div class="stat-card stat-card-inactive">
+            <span class="stat-card-value">{{ stats.inactive or 0 }}</span>
+            <span class="stat-card-label">Inactive</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-value">{{ stats.totalStock or 0 }}</span>
+            <span class="stat-card-label">Units in stock</span>
+        </div>
+    </div>
+
+    <!-- ================================================
+         FILTER TOOLBAR
+         ================================================ -->
+    <form
+        id="filter-form"
+        class="listings-toolbar"
+        action="{{ url_for('seller.listings') }}"
+        method="GET"
+        role="search"
+    >
+        <div class="listings-toolbar-left">
+
+            <!-- Status tabs -->
+            <div class="status-tabs" role="tablist" aria-label="Filter by status">
+                <a
+                    href="{{ url_for('seller.listings', status='', category=category_filter, q=search) }}"
+                    class="status-tab{% if not status_filter %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{{ 'true' if not status_filter else 'false' }}"
+                    id="tab-all"
+                >All</a>
+                <a
+                    href="{{ url_for('seller.listings', status='active', category=category_filter, q=search) }}"
+                    class="status-tab{% if status_filter == 'active' %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{{ 'true' if status_filter == 'active' else 'false' }}"
+                    id="tab-active"
+                >Active</a>
+                <a
+                    href="{{ url_for('seller.listings', status='inactive', category=category_filter, q=search) }}"
+                    class="status-tab{% if status_filter == 'inactive' %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{{ 'true' if status_filter == 'inactive' else 'false' }}"
+                    id="tab-inactive"
+                >Inactive</a>
+                <a
+                    href="{{ url_for('seller.listings', status='archived', category=category_filter, q=search) }}"
+                    class="status-tab{% if status_filter == 'archived' %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{{ 'true' if status_filter == 'archived' else 'false' }}"
+                    id="tab-archived"
+                >Archived</a>
+            </div>
+
+            <!-- Category filter -->
+            <select
+                name="category"
+                class="filter-select"
+                id="category-filter"
+                aria-label="Filter by category"
+            >
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat }}"{% if category_filter == cat %} selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+
+            <!-- Search -->
+            <input
+                type="search"
+                name="q"
+                class="filter-input"
+                id="search-input"
+                placeholder="Search listings..."
+                value="{{ search }}"
+                aria-label="Search listings"
+                style="width: 200px;"
+            >
+            <input type="hidden" name="status" value="{{ status_filter }}">
+        </div>
+
+        <button type="submit" class="btn btn-secondary" id="filter-submit-btn" style="height:36px; font-size:var(--text-sm);">
+            Search
+        </button>
+    </form>
+
+    <!-- ================================================
+         PRODUCTS TABLE
+         ================================================ -->
+    {% if products %}
+    <div class="products-table-wrap">
+        <table class="products-table" aria-label="Your product listings">
+            <thead>
+                <tr>
+                    <th class="product-thumb-cell" aria-label="Image"></th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th aria-label="Actions"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr id="product-row-{{ product.id }}">
+
+                    <!-- Thumbnail -->
+                    <td class="product-thumb-cell">
+                        {% if product.imageData %}
+                        <img
+                            src="{{ product.imageData }}"
+                            alt="{{ product.title }}"
+                            class="product-thumb"
+                            width="48"
+                            height="48"
+                            loading="lazy"
+                        >
+                        {% else %}
+                        <div
+                            class="product-thumb"
+                            aria-hidden="true"
+                            style="display:flex; align-items:center; justify-content:center;"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--color-text-disabled);" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                                <polyline points="21 15 16 10 5 21"/>
+                            </svg>
+                        </div>
+                        {% endif %}
+                    </td>
+
+                    <!-- Title + category -->
+                    <td class="product-title-cell">
+                        <a
+                            href="{{ url_for('seller.edit_listing', product_id=product.id) }}"
+                            class="product-title-link"
+                            id="product-title-{{ product.id }}"
+                        >{{ product.title }}</a>
+                        <div class="product-category-tag">{{ product.category }}</div>
+                    </td>
+
+                    <!-- Price -->
+                    <td>
+                        <span class="product-price">R {{ "%.2f"|format(product.price) }}</span>
+                    </td>
+
+                    <!-- Stock badge -->
+                    <td>
+                        {% if product.stock == 0 %}
+                        <span class="stock-badge stock-badge-out">Out of stock</span>
+                        {% elif product.stock <= 5 %}
+                        <span class="stock-badge stock-badge-low">{{ product.stock }} left</span>
+                        {% else %}
+                        <span class="stock-badge stock-badge-ok">{{ product.stock }}</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Status badge -->
+                    <td>
+                        <span class="status-badge status-badge-{{ product.status }}">
+                            {{ product.status | capitalize }}
+                        </span>
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                        <div class="product-actions">
+
+                            <!-- Edit -->
+                            <a
+                                href="{{ url_for('seller.edit_listing', product_id=product.id) }}"
+                                class="action-btn"
+                                id="edit-btn-{{ product.id }}"
+                            >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                                Edit
+                            </a>
+
+                            <!-- Toggle active/inactive (not for archived) -->
+                            {% if product.status != 'archived' %}
+                            <form
+                                id="toggle-form-{{ product.id }}"
+                                action="{{ url_for('seller.toggle', product_id=product.id) }}"
+                                method="POST"
+                                style="display:inline;"
+                            >
+                                <button
+                                    type="submit"
+                                    class="action-btn"
+                                    id="toggle-btn-{{ product.id }}"
+                                    data-toggle-form
+                                    aria-label="{{ 'Deactivate' if product.status == 'active' else 'Activate' }} {{ product.title }}"
+                                >
+                                    {{ "Deactivate" if product.status == "active" else "Activate" }}
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            <!-- Archive (two-step confirm) -->
+                            {% if product.status != 'archived' %}
+                            <form
+                                id="archive-form-{{ product.id }}"
+                                action="{{ url_for('seller.archive', product_id=product.id) }}"
+                                method="POST"
+                                style="display:inline;"
+                            >
+                                <button
+                                    type="button"
+                                    class="action-btn action-btn-danger"
+                                    id="archive-btn-{{ product.id }}"
+                                    data-archive-trigger
+                                    data-archive-form="archive-form-{{ product.id }}"
+                                    data-archive-label="{{ product.title }}"
+                                    aria-label="Archive {{ product.title }}"
+                                >Archive</button>
+                            </form>
+                            {% endif %}
+
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="pagination" aria-label="Pagination">
+            <span>
+                Showing
+                {{ (page - 1) * per_page + 1 }}–{{ [page * per_page, total] | min }}
+                of {{ total }}
+            </span>
+            <div class="pagination-pages">
+                <a
+                    href="{{ url_for('seller.listings', page=page-1, status=status_filter, category=category_filter, q=search) if page > 1 else '#' }}"
+                    class="page-btn{% if page <= 1 %} is-active{% endif %}"
+                    {% if page <= 1 %}aria-disabled="true"{% endif %}
+                    id="prev-page-btn"
+                    aria-label="Previous page"
+                >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                </a>
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page or (p >= page - 2 and p <= page + 2) or p == 1 or p == total_pages %}
+                    <a
+                        href="{{ url_for('seller.listings', page=p, status=status_filter, category=category_filter, q=search) }}"
+                        class="page-btn{% if p == page %} is-active{% endif %}"
+                        id="page-btn-{{ p }}"
+                        aria-label="Page {{ p }}"
+                        {% if p == page %}aria-current="page"{% endif %}
+                    >{{ p }}</a>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <span class="page-btn" style="border:none; cursor:default;">…</span>
+                    {% endif %}
+                {% endfor %}
+                <a
+                    href="{{ url_for('seller.listings', page=page+1, status=status_filter, category=category_filter, q=search) if page < total_pages else '#' }}"
+                    class="page-btn{% if page >= total_pages %}{% endif %}"
+                    {% if page >= total_pages %}aria-disabled="true"{% endif %}
+                    id="next-page-btn"
+                    aria-label="Next page"
+                >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% else %}
+    <!-- ================================================
+         EMPTY STATE
+         ================================================ -->
+    <div class="empty-state" id="empty-listings-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <rect x="2" y="7" width="20" height="14" rx="2"/>
+            <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+            <line x1="12" y1="12" x2="12" y2="16"/>
+            <line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+        {% if search or status_filter or category_filter %}
+        <h2 class="empty-state-title">No listings match your filters</h2>
+        <p class="empty-state-body">
+            Try adjusting the status, category, or search term above.
+        </p>
+        <a href="{{ url_for('seller.listings') }}" class="btn btn-secondary" id="clear-filters-btn">
+            Clear filters
+        </a>
+        {% else %}
+        <h2 class="empty-state-title">You have no listings yet</h2>
+        <p class="empty-state-body">
+            Create your first listing to start selling on eShop.
+            Your products will appear here once you add them.
+        </p>
+        <a href="{{ url_for('seller.new_listing') }}" class="btn btn-primary" id="first-listing-btn">
+            Add your first listing
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/seller/products.js') }}"></script>
+{% endblock %}
