@@ -32,8 +32,8 @@ def verified_required(f):
     """
     Require email verification before accessing the decorated route.
     Google OAuth users always pass (emailVerified is set to 1 on creation).
-    Unverified credential-auth users are redirected to their dashboard
-    with a prompt to verify their email.
+    Unverified credential-auth buyers are redirected to the shop with a
+    flash prompt — they stay in context and see the lock on the buttons.
     """
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -45,6 +45,9 @@ def verified_required(f):
                 "warning",
             )
             role = session.get("role", "buyer")
+            # Buyers stay on the shop; other roles fall back to their dashboard
+            if role == "buyer":
+                return redirect(url_for("buyer.shop"))
             return redirect(url_for(f"dashboard.{role}"))
         return f(*args, **kwargs)
 

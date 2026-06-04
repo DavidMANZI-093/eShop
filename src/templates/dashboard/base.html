@@ -62,18 +62,6 @@
 
             {% if role == 'buyer' %}
             <a
-                href="{{ url_for('dashboard.buyer') }}"
-                class="nav-link{% if request.endpoint == 'dashboard.buyer' %} is-active{% endif %}"
-                id="nav-buyer-home-link"
-            >
-                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                Dashboard
-            </a>
-            <div class="nav-section-label">Shopping</div>
-            <a
                 href="{{ url_for('buyer.shop') }}"
                 class="nav-link{% if request.endpoint in ('buyer.shop', 'buyer.product_detail') %} is-active{% endif %}"
                 id="nav-shop-link"

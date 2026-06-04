@@ -45,7 +45,8 @@ def _get_current_user_id():
 @login_required
 @role_required("buyer")
 def buyer():
-    return render_template("dashboard/buyer.html", **_user_context())
+    # Buyers land on the shop — no intermediate dashboard needed.
+    return redirect(url_for("buyer.shop"))
 
 
 @dashboard_bp.route("/seller")

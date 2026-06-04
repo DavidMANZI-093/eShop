@@ -276,6 +276,13 @@
     border: 1px solid rgba(99, 102, 241, 0.3);
 }
 
+/* Smaller variant when rendered inside the sidebar profile link */
+.sidebar-user-link .role-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    letter-spacing: 0.04em;
+}
+
 /* ============================================================
    VERIFICATION BANNER
    ============================================================ */
