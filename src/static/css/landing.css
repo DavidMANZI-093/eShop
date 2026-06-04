@@ -1,20 +1,8 @@
 /* ============================================================
    landing.css — Public landing page
+   Loaded ON TOP OF base.css — never re-define what base already owns.
    ============================================================ */
 
-/* ── Reset / base ─────────────────────────────────────────── */
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    background: hsl(224 20% 6%);
-    color: hsl(220 14% 92%);
-    font-family: var(--font-body);
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-
-/* ── Background ambient glow ──────────────────────────────── */
 
 .landing-bg {
     position: fixed;
@@ -68,7 +56,7 @@ body {
     to   { transform: translate(-50px, -30px) scale(1.05); }
 }
 
-/* ── Layout wrapper ───────────────────────────────────────── */
+/* ── Page layout wrapper ──────────────────────────────── */
 
 .landing-page {
     position: relative;
@@ -76,6 +64,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 /* ── Nav ──────────────────────────────────────────────────── */
@@ -89,20 +78,15 @@ body {
     top: 0;
     z-index: 100;
     backdrop-filter: blur(12px);
-    background: hsl(224 20% 6% / 0.7);
-    border-bottom: 1px solid hsl(220 15% 20% / 0.5);
+    background: hsl(0 0% 0% / 0.5);
+    border-bottom: 1px solid var(--color-border);
 }
 
+/* Landing logo: inherits .logo from base.css (Playfair italic gradient);
+   only override the size so it fits the nav nicely. */
 .landing-logo {
     font-size: var(--text-2xl);
-    font-weight: 800;
-    background: linear-gradient(135deg, hsl(258 80% 75%), hsl(221 80% 70%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.04em;
     text-decoration: none;
-    font-family: var(--font-body);
 }
 
 .landing-nav-actions {
@@ -311,12 +295,12 @@ body {
     font-size: var(--text-2xl);
     font-weight: 700;
     letter-spacing: -0.03em;
-    color: hsl(220 14% 94%);
+    color: var(--color-text-primary);
 }
 
 .section-sub {
     font-size: var(--text-sm);
-    color: hsl(220 10% 55%);
+    color: var(--color-text-secondary);
     margin-top: 4px;
 }
 
@@ -441,7 +425,7 @@ body {
 
 .feature-body {
     font-size: var(--text-sm);
-    color: hsl(220 10% 58%);
+    color: var(--color-text-secondary);
     line-height: 1.65;
 }
 
@@ -459,7 +443,7 @@ body {
 
 .landing-footer-copy {
     font-size: var(--text-xs);
-    color: hsl(220 10% 45%);
+    color: var(--color-text-disabled);
 }
 
 .landing-footer-links {
@@ -469,12 +453,12 @@ body {
 
 .landing-footer-link {
     font-size: var(--text-xs);
-    color: hsl(220 10% 45%);
+    color: var(--color-text-disabled);
     text-decoration: none;
     transition: color 150ms ease;
 }
 
-.landing-footer-link:hover { color: hsl(220 14% 80%); }
+.landing-footer-link:hover { color: var(--color-text-secondary); }
 
 /* ── Responsive ───────────────────────────────────────────── */
 
