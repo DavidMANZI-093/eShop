@@ -1,0 +1,152 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Shop — eShop{% endblock %}
+{% block meta_description %}Browse all products available on eShop.{% endblock %}
+{% block page_title %}Shop{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer.css') }}">
+{% endblock %}
+
+{% block topbar_actions %}
+<form
+    id="shop-filter-form"
+    action="{{ url_for('buyer.shop') }}"
+    method="GET"
+    role="search"
+    style="display:flex; align-items:center; gap:var(--space-2);"
+>
+    <input
+        type="search"
+        name="q"
+        id="shop-search"
+        class="shop-search-input"
+        placeholder="Search products…"
+        value="{{ search }}"
+        aria-label="Search products"
+        autocomplete="off"
+    >
+    <select
+        name="category"
+        id="shop-category-select"
+        class="shop-category-select"
+        aria-label="Filter by category"
+    >
+        <option value="">All categories</option>
+        {% for cat in categories %}
+        <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary" style="height:36px;" id="shop-search-btn">Search</button>
+    {% if search or category %}
+    <a href="{{ url_for('buyer.shop') }}" class="btn btn-secondary" style="height:36px;" id="shop-clear-btn">Clear</a>
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="buyer-page">
+
+    <!-- Result count -->
+    <div class="shop-count" style="margin-bottom:var(--space-3);">
+        {% if search or category %}
+        {{ total }} result{{ 's' if total != 1 else '' }}
+        {% if search %} for "<strong>{{ search }}</strong>"{% endif %}
+        {% if category %} in <strong>{{ category }}</strong>{% endif %}
+        {% else %}
+        {{ total }} product{{ 's' if total != 1 else '' }} available
+        {% endif %}
+    </div>
+
+    {% if products %}
+    <!-- Product grid -->
+    <div class="product-grid" id="product-grid" aria-label="Product listings">
+        {% for product in products %}
+        <article class="product-card" id="product-card-{{ product.id }}">
+            <a href="{{ url_for('buyer.product_detail', product_id=product.id) }}" class="product-card-image-wrap" tabindex="-1" aria-hidden="true">
+                <img
+                    src="{{ product.imageData or placeholder_img }}"
+                    alt="{{ product.title }}"
+                    class="product-card-image{% if not product.imageData %} is-placeholder{% endif %}"
+                    loading="lazy"
+                >
+            </a>
+            <div class="product-card-body">
+                <span class="product-card-category">{{ product.category }}</span>
+                <a
+                    href="{{ url_for('buyer.product_detail', product_id=product.id) }}"
+                    class="product-card-title"
+                    id="product-link-{{ product.id }}"
+                >{{ product.title }}</a>
+                <div class="product-card-price">R {{ "%.2f"|format(product.price) }}</div>
+                {% if product.stock <= 5 %}
+                <div class="product-card-stock-low">Only {{ product.stock }} left</div>
+                {% endif %}
+            </div>
+            <div class="product-card-footer">
+                <!-- Form wraps the button for no-JS fallback -->
+                <form action="{{ url_for('buyer.cart_add') }}" method="POST" class="add-cart-form">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="quantity"   value="1">
+                    <button
+                        type="submit"
+                        class="btn-add-cart"
+                        data-product-id="{{ product.id }}"
+                        id="add-cart-{{ product.id }}"
+                        aria-label="Add {{ product.title }} to cart"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                        Add to cart
+                    </button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="pagination" aria-label="Product pages">
+        {% if page > 1 %}
+        <a href="{{ url_for('buyer.shop', page=page-1, q=search, category=category) }}"
+           class="pagination-btn" id="shop-prev-btn">&larr; Previous</a>
+        {% endif %}
+        <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+        <a href="{{ url_for('buyer.shop', page=page+1, q=search, category=category) }}"
+           class="pagination-btn" id="shop-next-btn">Next &rarr;</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="empty-state" id="shop-empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <h2 class="empty-state-title">
+            {% if search or category %}No products found{% else %}No products yet{% endif %}
+        </h2>
+        <p class="empty-state-body">
+            {% if search or category %}
+            Try adjusting your search or browsing all categories.
+            {% else %}
+            Check back soon — sellers are adding products all the time.
+            {% endif %}
+        </p>
+        {% if search or category %}
+        <a href="{{ url_for('buyer.shop') }}" class="btn btn-primary" id="shop-clear-empty-btn">View all products</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/buyer/shop.js') }}"></script>
+{% endblock %}

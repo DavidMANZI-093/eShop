@@ -1,43 +1,76 @@
 {% extends "dashboard/base.html" %}
 
 {% block title %}Buyer Dashboard — eShop{% endblock %}
-{% block meta_description %}Your eShop buyer dashboard — browse products and manage orders.{% endblock %}
+{% block meta_description %}Your eShop buyer dashboard — browse products and manage your cart.{% endblock %}
 
-{% block sidebar_nav %}
-<a href="{{ url_for('dashboard.buyer') }}" class="nav-link is-active" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-        <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer.css') }}">
+{% endblock %}
+
+{% block sidebar_nav %}{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('buyer.shop') }}" class="btn btn-primary" id="browse-shop-topbar-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    Dashboard
-</a>
-<span class="nav-section-label">Shopping</span>
-<a href="#" class="nav-link" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-    </svg>
-    Browse products
-</a>
-<a href="#" class="nav-link" role="listitem">
-    <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
-    </svg>
-    My orders
+    Browse shop
 </a>
 {% endblock %}
 
-{% block page_title %}Dashboard{% endblock %}
-
 {% block content %}
-<section class="dashboard-welcome">
-    <p class="dashboard-welcome-eyebrow">Welcome back</p>
-    <h1 class="dashboard-welcome-heading">Hello, {{ fullName.split()[0] }}</h1>
-    <p class="dashboard-welcome-body">
-        Your buyer dashboard is ready. Product browsing, order history,
-        and more are on the way.
-    </p>
-    <a href="#" class="btn btn-primary">Browse products</a>
-</section>
+<div class="buyer-page">
+
+    <!-- Welcome -->
+    <section class="dashboard-welcome" aria-labelledby="buyer-welcome-heading">
+        <p class="dashboard-welcome-eyebrow">Welcome back</p>
+        <h1 class="dashboard-welcome-heading" id="buyer-welcome-heading">
+            Hello, {{ fullName.split()[0] }}
+        </h1>
+        {% if not emailVerified %}
+        <div class="verify-gate" role="alert">
+            <svg class="verify-gate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div class="verify-gate-body">
+                <span class="verify-gate-title">Verify your email to unlock your cart</span>
+                <span class="verify-gate-text">
+                    Check your inbox for the verification link.
+                    <form action="{{ url_for('auth.resend_verification') }}" method="POST" style="display:inline;">
+                        <button type="submit" style="background:none;border:none;color:hsl(38 80% 75%);cursor:pointer;font-size:inherit;padding:0;text-decoration:underline;">
+                            Resend email
+                        </button>
+                    </form>
+                </span>
+            </div>
+        </div>
+        {% else %}
+        <p class="dashboard-welcome-body">
+            Explore the shop, manage your cart, and track your orders.
+        </p>
+        {% endif %}
+    </section>
+
+    <!-- Quick stats -->
+    {% if emailVerified %}
+    <div class="stats-strip" style="margin-top:var(--space-4);" aria-label="Cart summary">
+        <div class="stat-card">
+            <span class="stat-card-value">{{ cart_count }}</span>
+            <span class="stat-card-label">Items in cart</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-card-value">—</span>
+            <span class="stat-card-label">Orders placed</span>
+        </div>
+    </div>
+
+    <div style="margin-top:var(--space-5); display:flex; gap:var(--space-3);">
+        <a href="{{ url_for('buyer.shop') }}"  class="btn btn-primary"   id="go-shop-btn">Browse shop</a>
+        <a href="{{ url_for('buyer.cart') }}"  class="btn btn-secondary" id="go-cart-btn">View cart</a>
+    </div>
+    {% endif %}
+
+</div>
 {% endblock %}

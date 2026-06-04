@@ -1,0 +1,194 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}My Cart — eShop{% endblock %}
+{% block meta_description %}Review your cart and proceed to checkout.{% endblock %}
+{% block page_title %}My Cart{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer.css') }}">
+{% endblock %}
+
+{% block topbar_actions %}
+{% if items %}
+<div class="clear-cart-group">
+    <button
+        type="button"
+        class="btn btn-secondary"
+        id="clear-cart-btn"
+        style="height:36px;"
+    >Clear cart</button>
+
+    <div class="clear-confirm-group" id="clear-confirm-group" role="group" aria-label="Confirm clear cart">
+        <span style="font-size:var(--text-sm); color:var(--color-text-secondary);">Clear everything?</span>
+        <button
+            type="button"
+            class="btn btn-danger"
+            id="clear-confirm-yes"
+            style="height:32px; font-size:var(--text-sm);"
+        >Yes, clear</button>
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="clear-confirm-no"
+            style="height:32px; font-size:var(--text-sm);"
+        >Cancel</button>
+    </div>
+</div>
+{% endif %}
+<a href="{{ url_for('buyer.shop') }}" class="btn btn-primary" id="continue-shopping-btn" style="height:36px;">
+    Continue shopping
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="buyer-page">
+
+    {% if items %}
+    <div class="cart-layout">
+
+        <!-- ── Cart items ──────────────────────────────────── -->
+        <div class="cart-items-section" id="cart-items-container" aria-label="Cart items">
+
+            {% for item in items %}
+            <div
+                class="cart-item{% if not item.available %} is-unavailable{% endif %}"
+                id="cart-row-{{ item.product.id }}"
+                data-product-id="{{ item.product.id }}"
+                data-stock="{{ item.product.stock if item.available else 0 }}"
+            >
+                <!-- Thumbnail -->
+                <img
+                    src="{{ item.product.imageData or placeholder_img }}"
+                    alt="{{ item.product.title }}"
+                    class="cart-item-image{% if not item.product.get('imageData') %} is-placeholder{% endif %}"
+                >
+
+                <!-- Details -->
+                <div class="cart-item-details">
+                    {% if item.available %}
+                    <a
+                        href="{{ url_for('buyer.product_detail', product_id=item.product.id) }}"
+                        class="cart-item-title"
+                        id="cart-title-{{ item.product.id }}"
+                    >{{ item.product.title }}</a>
+                    <span class="cart-item-price">R {{ "%.2f"|format(item.product.price) }} each</span>
+                    {% if item.product.get('stock', 0) <= 5 and item.product.get('stock', 0) > 0 %}
+                    <span class="cart-item-price" style="color:var(--color-warning);">
+                        Only {{ item.product.stock }} in stock
+                    </span>
+                    {% endif %}
+                    {% else %}
+                    <span class="cart-item-title">{{ item.product.title }}</span>
+                    <span class="cart-item-unavailable-msg">This item is no longer available.</span>
+                    {% endif %}
+                </div>
+
+                <!-- Controls: qty stepper + line total + remove -->
+                <div class="cart-item-controls">
+                    {% if item.available %}
+                    <span class="cart-item-line-total" id="line-total-{{ item.product.id }}">
+                        R {{ "%.2f"|format(item.line_total) }}
+                    </span>
+
+                    <div class="cart-qty-stepper" aria-label="Quantity for {{ item.product.title }}">
+                        <button
+                            type="button"
+                            class="cart-qty-btn"
+                            data-cart-action="decrease"
+                            aria-label="Decrease"
+                            {% if item.quantity <= 1 %}disabled{% endif %}
+                        >&minus;</button>
+                        <span class="cart-qty-value">{{ item.quantity }}</span>
+                        <button
+                            type="button"
+                            class="cart-qty-btn"
+                            data-cart-action="increase"
+                            aria-label="Increase"
+                            {% if item.quantity >= item.product.stock or item.quantity >= 99 %}disabled{% endif %}
+                        >&plus;</button>
+                    </div>
+                    {% else %}
+                    <span class="cart-item-line-total" style="text-decoration:line-through; opacity:.5;">
+                        R {{ "%.2f"|format(item.product.price * item.quantity if item.product.get('price') else 0) }}
+                    </span>
+                    {% endif %}
+
+                    <!-- Remove button (always visible) -->
+                    <button
+                        type="button"
+                        class="cart-remove-btn"
+                        data-cart-action="remove"
+                        aria-label="Remove {{ item.product.title }} from cart"
+                        id="remove-{{ item.product.id }}"
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if has_unavailable %}
+            <p style="font-size:var(--text-xs); color:var(--color-text-disabled); margin-top:var(--space-1);">
+                Unavailable items will not be included at checkout.
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- ── Cart summary ────────────────────────────────── -->
+        <div class="cart-summary" id="cart-summary-panel" aria-label="Order summary">
+            <div class="cart-summary-title">Order summary</div>
+
+            <div class="cart-summary-row">
+                <span>Items ({{ item_count }})</span>
+                <span id="cart-summary-item-count">{{ item_count }}</span>
+            </div>
+            <div class="cart-summary-total">
+                <span>Total</span>
+                <span id="cart-total-value">R {{ "%.2f"|format(cart_total) }}</span>
+            </div>
+
+            <!-- Checkout (placeholder — orders not yet implemented) -->
+            <button
+                type="button"
+                class="btn-checkout"
+                id="checkout-btn"
+                {% if has_unavailable %}disabled title="Remove unavailable items first"{% endif %}
+            >
+                Proceed to checkout
+            </button>
+
+            <p style="font-size:var(--text-xs); color:var(--color-text-disabled); text-align:center; line-height:1.5;">
+                Secure checkout &middot; Orders shipped within 2 business days
+            </p>
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- Empty cart -->
+    <div class="empty-state" id="cart-empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+        </svg>
+        <h2 class="empty-state-title">Your cart is empty</h2>
+        <p class="empty-state-body">
+            Head to the shop to find something you'd like.
+        </p>
+        <a href="{{ url_for('buyer.shop') }}" class="btn btn-primary" id="shop-from-empty-cart-btn">Browse shop</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if items %}
+<script src="{{ url_for('static', filename='js/buyer/cart.js') }}"></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}{{ product.title }} — eShop{% endblock %}
+{% block meta_description %}{{ product.description[:160] }}{% endblock %}
+{% block page_title %}Product{% endblock %}
+
+{% block dashboard_extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/buyer.css') }}">
+{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('buyer.shop') }}" class="btn btn-secondary" id="back-to-shop-btn" style="height:36px;">
+    &larr; Back to shop
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="buyer-page">
+    <div class="product-detail-layout">
+
+        <!-- Image -->
+        <img
+            src="{{ product.imageData or placeholder_img }}"
+            alt="{{ product.title }}"
+            class="product-detail-image{% if not product.imageData %} is-placeholder{% endif %}"
+        >
+
+        <!-- Info -->
+        <div class="product-detail-info">
+            <span class="product-detail-category">{{ product.category }}</span>
+            <h1 class="product-detail-title">{{ product.title }}</h1>
+            <div class="product-detail-price">R {{ "%.2f"|format(product.price) }}</div>
+            <div class="product-detail-seller">
+                Sold by <strong>{{ product.sellerName }}</strong>
+            </div>
+
+            <hr class="product-detail-divider">
+
+            <!-- Stock status -->
+            {% if product.stock == 0 %}
+            <span class="product-detail-stock product-detail-stock-out">Out of stock</span>
+            {% elif product.stock <= 5 %}
+            <span class="product-detail-stock product-detail-stock-low">
+                Only {{ product.stock }} left
+            </span>
+            {% else %}
+            <span class="product-detail-stock product-detail-stock-ok">In stock</span>
+            {% endif %}
+
+            <!-- Add to cart -->
+            {% if product.stock > 0 %}
+            <form
+                id="product-add-cart-form"
+                action="{{ url_for('buyer.cart_add') }}"
+                method="POST"
+                aria-label="Add to cart"
+            >
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+
+                <div class="add-to-cart-row">
+                    <!-- Quantity stepper (for the detail page form) -->
+                    <div class="qty-stepper" aria-label="Quantity">
+                        <button
+                            type="button"
+                            class="qty-stepper-btn"
+                            id="detail-qty-decrease"
+                            aria-label="Decrease quantity"
+                            disabled
+                        >&minus;</button>
+                        <span class="qty-stepper-value" id="detail-qty-value">1</span>
+                        <input type="hidden" name="quantity" id="detail-qty-input" value="1">
+                        <button
+                            type="button"
+                            class="qty-stepper-btn"
+                            id="detail-qty-increase"
+                            aria-label="Increase quantity"
+                            {% if product.stock <= 1 %}disabled{% endif %}
+                        >&plus;</button>
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-add-cart"
+                        id="detail-add-cart-btn"
+                        style="flex:1;"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                        </svg>
+                        Add to cart
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <button class="btn-add-cart" disabled aria-disabled="true">
+                Out of stock
+            </button>
+            {% endif %}
+
+            <hr class="product-detail-divider">
+
+            <!-- Description -->
+            <p class="product-detail-description">{{ product.description }}</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var dec    = document.getElementById("detail-qty-decrease");
+    var inc    = document.getElementById("detail-qty-increase");
+    var valEl  = document.getElementById("detail-qty-value");
+    var hidden = document.getElementById("detail-qty-input");
+    var maxStock = {{ product.stock }};
+    var qty = 1;
+
+    function sync() {
+        valEl.textContent = qty;
+        hidden.value      = qty;
+        dec.disabled      = qty <= 1;
+        inc.disabled      = qty >= maxStock || qty >= 99;
+    }
+
+    if (dec) dec.addEventListener("click", function() { if (qty > 1) { qty--; sync(); } });
+    if (inc) inc.addEventListener("click", function() { if (qty < maxStock && qty < 99) { qty++; sync(); } });
+})();
+</script>
+{% endblock %}

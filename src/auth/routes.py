@@ -11,6 +11,7 @@ from flask import (
 from src.shared.config import settings
 from src.shared.db import get_db
 from src.shared.decorators import login_required
+from src.shared.cart import restore_cart_from_db, save_cart_to_db
 
 from .oauth import oauth
 from .queries import fetch_user_by_username
@@ -64,6 +65,9 @@ def login():
             )
 
         _set_user_session(user)
+        # Restore any previously persisted cart for this buyer
+        if user["role"] == "buyer":
+            restore_cart_from_db(get_db(), user["id"])
         return redirect(_dashboard_url(user["role"]))
 
     return render_template(
@@ -76,6 +80,13 @@ def login():
 
 @auth_bp.route("/logout")
 def logout():
+    # Persist the cart to DB before clearing the session so it survives
+    # across sign-outs for buyers.
+    if session.get("role") == "buyer" and "user" in session:
+        from src.auth.queries import fetch_user_by_username
+        user = fetch_user_by_username(get_db(), session["user"])
+        if user:
+            save_cart_to_db(get_db(), user["id"])
     session.clear()
     return redirect(url_for("auth.login"))
 
@@ -249,6 +260,8 @@ def google_callback():
 
     user = result["user"]
     _set_user_session(user)
+    if user["role"] == "buyer":
+        restore_cart_from_db(get_db(), user["id"])
     return redirect(_dashboard_url(user["role"]))
 
 

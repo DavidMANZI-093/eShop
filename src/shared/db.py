@@ -105,6 +105,18 @@ def _create_tables(db):
         END
         """
     )
+    db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cart_items (
+            id        TEXT PRIMARY KEY DEFAULT (uuid()),
+            userId    TEXT    NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
+            productId TEXT    NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+            quantity  INTEGER NOT NULL DEFAULT 1 CHECK(quantity > 0),
+            savedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(userId, productId)
+        )
+        """
+    )
     db.commit()
 
 
