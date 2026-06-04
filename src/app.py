@@ -1,6 +1,6 @@
-from datetime import timedelta
+from datetime import date, timedelta
 
-from flask import Flask, redirect, session, url_for
+from flask import Flask, render_template, session
 
 from src.auth.oauth import init_oauth
 from src.shared.cart import session_cart_count
@@ -19,26 +19,67 @@ def create_app():
     # Keep session cookie alive across browser restarts (30 days).
     # The session cart relies on this to survive without a DB write on every
     # browser close.
-    app.config["SESSION_PERMANENT"]        = True
+    app.config["SESSION_PERMANENT"]          = True
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 
     app.teardown_appcontext(close_db)
 
     init_oauth(app)
 
-    from src.auth.routes import auth_bp
-    from src.buyer.routes import buyer_bp
+    from src.auth.routes     import auth_bp
+    from src.buyer.routes    import buyer_bp
     from src.dashboard.routes import dashboard_bp
-    from src.seller.routes import seller_bp
+    from src.seller.routes   import seller_bp
 
-    app.register_blueprint(auth_bp,      url_prefix="/auth")
-    app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
-    app.register_blueprint(seller_bp,    url_prefix="/seller")
-    app.register_blueprint(buyer_bp,     url_prefix="/buyer")
+    app.register_blueprint(auth_bp,       url_prefix="/auth")
+    app.register_blueprint(dashboard_bp,  url_prefix="/dashboard")
+    app.register_blueprint(seller_bp,     url_prefix="/seller")
+    app.register_blueprint(buyer_bp,      url_prefix="/buyer")
 
     @app.route("/")
-    def home():
-        return redirect(url_for("auth.login"))
+    def landing():
+        from src.shared.db import get_db
+
+        db        = get_db()
+        logged_in = "user" in session
+        role      = session.get("role", "")
+
+        # Live stats
+        stats = {
+            "products": db.execute(
+                "SELECT COUNT(*) FROM products WHERE status='active'"
+            ).fetchone()[0],
+            "sellers": db.execute(
+                "SELECT COUNT(*) FROM users WHERE role='seller'"
+            ).fetchone()[0],
+            "buyers": db.execute(
+                "SELECT COUNT(*) FROM users WHERE role='buyer'"
+            ).fetchone()[0],
+        }
+
+        # Featured products (newest first, up to 8)
+        featured = [
+            dict(r)
+            for r in db.execute(
+                """
+                SELECT id, title, price, category, imageData
+                FROM   products
+                WHERE  status = 'active'
+                ORDER  BY createdAt DESC
+                LIMIT  8
+                """
+            ).fetchall()
+        ]
+
+        return render_template(
+            "landing.html",
+            logged_in       = logged_in,
+            role            = role,
+            stats           = stats,
+            featured        = featured,
+            placeholder_img = settings.DEFAULT_PRODUCT_IMAGE,
+            year            = date.today().year,
+        )
 
     # Inject cart_count into every template so the sidebar badge always works.
     @app.context_processor

@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}eShop — Discover. Shop. Sell.{% endblock %}
+{% block meta_description %}eShop is the marketplace where anyone can discover great products and anyone can list what they sell. Start shopping or start selling today.{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
+{% block body %}
+<!-- Ambient background orbs -->
+<div class="landing-bg" aria-hidden="true">
+    <div class="landing-bg-orb landing-bg-orb-1"></div>
+    <div class="landing-bg-orb landing-bg-orb-2"></div>
+    <div class="landing-bg-orb landing-bg-orb-3"></div>
+</div>
+
+<div class="landing-page">
+
+    <!-- ── Navbar ──────────────────────────────────────────────── -->
+    <nav class="landing-nav" role="navigation" aria-label="Site navigation">
+        <a href="{{ url_for('landing') }}" class="landing-logo" aria-label="eShop home">eShop</a>
+
+        <div class="landing-nav-actions">
+            {% if logged_in %}
+                {% if role == 'seller' %}
+                <a href="{{ url_for('dashboard.seller') }}" class="lbtn lbtn-ghost" id="nav-dashboard-btn">Dashboard</a>
+                {% elif role == 'admin' %}
+                <a href="{{ url_for('dashboard.admin') }}"  class="lbtn lbtn-ghost" id="nav-admin-btn">Admin</a>
+                {% endif %}
+                <a href="{{ url_for('buyer.shop') }}" class="lbtn lbtn-primary" id="nav-shop-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    Shop
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}"    class="lbtn lbtn-ghost"   id="nav-signin-btn">Sign in</a>
+                <a href="{{ url_for('auth.signup') }}" class="lbtn lbtn-primary" id="nav-signup-btn">Get started</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- ── Hero ────────────────────────────────────────────────── -->
+    <section class="landing-hero" aria-labelledby="hero-heading">
+        <div class="hero-eyebrow">
+            <span class="hero-eyebrow-dot"></span>
+            Your local marketplace
+        </div>
+
+        <h1 class="hero-headline" id="hero-heading">
+            Discover.<br>
+            <span class="hero-headline-gradient">Shop. Sell.</span>
+        </h1>
+
+        <p class="hero-sub">
+            Browse thousands of products from real sellers, or list your own.
+            eShop makes buying and selling simple, fast, and secure.
+        </p>
+
+        <div class="hero-actions">
+            {% if logged_in %}
+            <a href="{{ url_for('buyer.shop') }}" class="lbtn lbtn-primary lbtn-lg" id="hero-shop-btn">
+                Browse shop
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+            {% if role == 'seller' %}
+            <a href="{{ url_for('dashboard.seller') }}" class="lbtn lbtn-outline lbtn-lg" id="hero-dashboard-btn">Seller dashboard</a>
+            {% endif %}
+            {% else %}
+            <a href="{{ url_for('auth.signup') }}" class="lbtn lbtn-primary lbtn-lg" id="hero-cta-btn">
+                Get started free
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="lbtn lbtn-outline lbtn-lg" id="hero-signin-btn">Sign in</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ── Stats bar ───────────────────────────────────────────── -->
+    <div class="landing-stats" aria-label="Platform statistics">
+        <div class="stat-item">
+            <div class="stat-item-value">{{ stats.products }}</div>
+            <div class="stat-item-label">Products listed</div>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+            <div class="stat-item-value">{{ stats.sellers }}</div>
+            <div class="stat-item-label">Active sellers</div>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+            <div class="stat-item-value">{{ stats.buyers }}</div>
+            <div class="stat-item-label">Shoppers</div>
+        </div>
+    </div>
+
+    <!-- ── Featured products ────────────────────────────────────── -->
+    {% if featured %}
+    <section class="landing-section" aria-labelledby="featured-heading">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title" id="featured-heading">Featured products</h2>
+                <p class="section-sub">Hand-picked from our latest listings</p>
+            </div>
+            <a href="{{ url_for('auth.login') if not logged_in else url_for('buyer.shop') }}"
+               class="lbtn lbtn-ghost"
+               id="view-all-btn">
+                View all
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="landing-product-grid" id="featured-products-grid">
+            {% for product in featured %}
+            <a
+                href="{{ url_for('auth.login') if not logged_in else url_for('buyer.product_detail', product_id=product.id) }}"
+                class="landing-product-card"
+                id="featured-card-{{ product.id }}"
+                aria-label="{{ product.title }}, R {{ '%.2f'|format(product.price) }}"
+            >
+                <img
+                    src="{{ product.imageData or placeholder_img }}"
+                    alt="{{ product.title }}"
+                    class="landing-card-image{% if not product.imageData %} is-placeholder{% endif %}"
+                    loading="lazy"
+                >
+                <div class="landing-card-body">
+                    <span class="landing-card-category">{{ product.category }}</span>
+                    <div class="landing-card-title">{{ product.title }}</div>
+                    <div class="landing-card-price">R {{ "%.2f"|format(product.price) }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ── Features ─────────────────────────────────────────────── -->
+    <section class="landing-section" aria-labelledby="features-heading">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title" id="features-heading">Everything you need</h2>
+                <p class="section-sub">Built for buyers and sellers alike</p>
+            </div>
+        </div>
+
+        <div class="landing-features">
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <div class="feature-title">Discover products</div>
+                <p class="feature-body">
+                    Search and filter through an ever-growing catalog. Find exactly what you need from verified local sellers.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                </div>
+                <div class="feature-title">Easy selling</div>
+                <p class="feature-body">
+                    List your products in minutes. Manage inventory, track interest, and reach buyers looking for exactly what you offer.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                </div>
+                <div class="feature-title">Smart cart</div>
+                <p class="feature-body">
+                    Your cart stays with you. Add items across sessions, adjust quantities, and check out when you are ready.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Footer ───────────────────────────────────────────────── -->
+    <footer class="landing-footer" role="contentinfo">
+        <span class="landing-footer-copy">&copy; {{ year }} eShop. All rights reserved.</span>
+        <nav class="landing-footer-links" aria-label="Footer links">
+            <a href="{{ url_for('auth.login') }}"    class="landing-footer-link" id="footer-signin-link">Sign in</a>
+            <a href="{{ url_for('auth.signup') }}" class="landing-footer-link" id="footer-signup-link">Sign up</a>
+        </nav>
+    </footer>
+
+</div>
+{% endblock %}
