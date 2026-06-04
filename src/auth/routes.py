@@ -40,6 +40,8 @@ def _set_user_session(user):
 
 
 def _dashboard_url(role):
+    if role == "buyer":
+        return url_for("buyer.shop")
     return url_for(f"dashboard.{role}")
 
 

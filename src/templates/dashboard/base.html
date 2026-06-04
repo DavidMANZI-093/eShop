@@ -112,22 +112,16 @@
             {% endif %}
             {% endif %}
 
-            <div class="nav-section-label">Account</div>
-            <a
-                href="{{ url_for('dashboard.profile') }}"
-                class="nav-link{% if request.endpoint == 'dashboard.profile' %} is-active{% endif %}"
-                id="nav-profile-link"
-            >
-                <svg class="nav-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-                Profile
-            </a>
         </div>
 
         <div class="sidebar-footer">
-            <div class="sidebar-user">
+            <a
+                href="{{ url_for('dashboard.profile') }}"
+                class="sidebar-user-link{% if request.endpoint == 'dashboard.profile' %} is-active{% endif %}"
+                id="nav-profile-avatar-link"
+                aria-label="Go to your profile"
+                title="Profile"
+            >
                 <img
                     src="{{ imageData }}"
                     alt="{{ userName }}'s profile photo"
@@ -141,7 +135,7 @@
                         <span class="role-badge role-badge-{{ role }}">{{ role }}</span>
                     </span>
                 </div>
-            </div>
+            </a>
             <a
                 href="{{ url_for('auth.logout') }}"
                 class="nav-link"
