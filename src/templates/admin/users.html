@@ -1,0 +1,224 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Users — Admin — eShop{% endblock %}
+{% block meta_description %}Manage all eShop users: change roles, verify accounts, remove users.{% endblock %}
+{% block page_title %}Users{% endblock %}
+
+{% block topbar_actions %}
+<span class="admin-result-count" id="users-result-count">
+    {{ total }} user{{ 's' if total != 1 else '' }}
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <!-- ── Toolbar: search + role filter ────────────────────── -->
+    <form class="admin-toolbar" method="GET" action="{{ url_for('admin.users') }}" id="users-filter-form">
+        <div class="admin-search-wrap">
+            <svg class="admin-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+                type="search"
+                name="q"
+                value="{{ search }}"
+                class="admin-search-input"
+                placeholder="Search by name, username, or email…"
+                id="users-search-input"
+                autocomplete="off"
+            >
+        </div>
+
+        <select name="role" class="admin-filter-select" id="users-role-filter" onchange="this.form.submit()">
+            <option value="" {% if not role_filter %}selected{% endif %}>All roles</option>
+            <option value="buyer"  {% if role_filter == 'buyer'  %}selected{% endif %}>Buyers</option>
+            <option value="seller" {% if role_filter == 'seller' %}selected{% endif %}>Sellers</option>
+            <option value="admin"  {% if role_filter == 'admin'  %}selected{% endif %}>Admins</option>
+        </select>
+
+        <button type="submit" class="btn btn-secondary" id="users-search-btn">Search</button>
+
+        {% if search or role_filter %}
+        <a href="{{ url_for('admin.users') }}" class="admin-clear-filter" id="users-clear-filter">Clear</a>
+        {% endif %}
+    </form>
+
+    <!-- ── Table ─────────────────────────────────────────────── -->
+    {% if admin_users %}
+    <div class="admin-table-wrap">
+        <table class="admin-table" id="users-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Verified</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in admin_users %}
+                {% set is_self = u.id == self_id %}
+                <tr class="admin-row{% if is_self %} admin-row-self{% endif %}" id="user-row-{{ u.id }}">
+
+                    <!-- User identity -->
+                    <td>
+                        <div class="admin-user-cell">
+                            <span class="admin-user-name">
+                                {{ u.fullName or u.userName }}
+                                {% if is_self %}<span class="admin-self-tag">you</span>{% endif %}
+                            </span>
+                            <span class="admin-user-email">@{{ u.userName }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Email -->
+                    <td class="admin-cell-secondary">{{ u.email }}</td>
+
+                    <!-- Role badge + change form -->
+                    <td>
+                        <form
+                            class="admin-role-form"
+                            method="POST"
+                            action="{{ url_for('admin.user_set_role', user_id=u.id) }}"
+                            id="role-form-{{ u.id }}"
+                        >
+                            <input type="hidden" name="q"           value="{{ search }}">
+                            <input type="hidden" name="role_filter" value="{{ role_filter }}">
+                            <input type="hidden" name="page"        value="{{ page }}">
+                            <select
+                                name="new_role"
+                                class="admin-role-select"
+                                id="role-select-{{ u.id }}"
+                                {% if is_self %}disabled title="You cannot change your own role"{% endif %}
+                            >
+                                <option value="buyer"  {% if u.role == 'buyer'  %}selected{% endif %}>buyer</option>
+                                <option value="seller" {% if u.role == 'seller' %}selected{% endif %}>seller</option>
+                                <option value="admin"  {% if u.role == 'admin'  %}selected{% endif %}>admin</option>
+                            </select>
+                            {% if not is_self %}
+                            <button
+                                type="submit"
+                                class="admin-btn admin-btn-ghost-sm"
+                                id="role-apply-{{ u.id }}"
+                                title="Apply role change"
+                            >Apply</button>
+                            {% endif %}
+                        </form>
+                    </td>
+
+                    <!-- Verified status + toggle -->
+                    <td>
+                        {% if u.googleId %}
+                        <span class="admin-badge admin-badge-google" title="Google OAuth — always verified">Google</span>
+                        {% else %}
+                        <form
+                            method="POST"
+                            action="{{ url_for('admin.user_toggle_verify', user_id=u.id) }}"
+                            id="verify-form-{{ u.id }}"
+                            style="display:inline;"
+                        >
+                            <input type="hidden" name="q"           value="{{ search }}">
+                            <input type="hidden" name="role_filter" value="{{ role_filter }}">
+                            <input type="hidden" name="page"        value="{{ page }}">
+                            <button
+                                type="submit"
+                                class="admin-badge admin-badge-btn {% if u.emailVerified %}admin-badge-ok{% else %}admin-badge-warn{% endif %}"
+                                id="verify-btn-{{ u.id }}"
+                                title="Click to {{ 'unverify' if u.emailVerified else 'verify' }}"
+                            >
+                                {{ 'Verified' if u.emailVerified else 'Unverified' }}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+
+                    <!-- Join date -->
+                    <td class="admin-date">{{ u.createdAt | date }}</td>
+
+                    <!-- Delete (two-step) -->
+                    <td>
+                        {% if is_self %}
+                        <span class="admin-btn admin-btn-danger-sm" style="opacity:.3; cursor:not-allowed;" title="Cannot delete your own account">Delete</span>
+                        {% else %}
+                        <div class="admin-delete-group" id="del-grp-{{ u.id }}">
+                            <button
+                                type="button"
+                                class="admin-btn admin-btn-danger-sm"
+                                data-delete-trigger
+                                id="del-btn-{{ u.id }}"
+                            >Delete</button>
+                            <div class="admin-delete-confirm" hidden id="del-confirm-{{ u.id }}">
+                                <span class="admin-delete-msg">Sure?</span>
+                                <form method="POST" action="{{ url_for('admin.user_delete', user_id=u.id) }}">
+                                    <input type="hidden" name="q"           value="{{ search }}">
+                                    <input type="hidden" name="role_filter" value="{{ role_filter }}">
+                                    <input type="hidden" name="page"        value="{{ page }}">
+                                    <button type="submit" class="admin-btn admin-btn-danger-sm" id="del-yes-{{ u.id }}">Yes</button>
+                                </form>
+                                <button type="button" class="admin-btn admin-btn-ghost-sm" data-delete-cancel id="del-no-{{ u.id }}">No</button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── Pagination ───────────────────────────────────────── -->
+    {% if total_pages > 1 %}
+    <div class="pagination" id="users-pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('admin.users', q=search, role=role_filter, page=page-1) }}" class="pagination-btn" id="users-prev-btn">&larr; Previous</a>
+        {% else %}
+        <span class="pagination-btn" style="opacity:.3; cursor:default;">&larr; Previous</span>
+        {% endif %}
+
+        <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+        <a href="{{ url_for('admin.users', q=search, role=role_filter, page=page+1) }}" class="pagination-btn" id="users-next-btn">Next &rarr;</a>
+        {% else %}
+        <span class="pagination-btn" style="opacity:.3; cursor:default;">Next &rarr;</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state" id="users-empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+        </svg>
+        <p class="empty-state-title">No users found</p>
+        <p class="empty-state-body">Try a different search term or clear the filters.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    document.querySelectorAll("[data-delete-trigger]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var grp = this.closest(".admin-delete-group");
+            this.hidden = true;
+            grp.querySelector(".admin-delete-confirm").hidden = false;
+        });
+    });
+    document.querySelectorAll("[data-delete-cancel]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var grp = this.closest(".admin-delete-group");
+            grp.querySelector("[data-delete-trigger]").hidden = false;
+            grp.querySelector(".admin-delete-confirm").hidden = true;
+        });
+    });
+})();
+</script>
+{% endblock %}

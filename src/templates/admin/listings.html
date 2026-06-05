@@ -1,0 +1,174 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Listings — Admin — eShop{% endblock %}
+{% block meta_description %}Manage all eShop product listings: toggle active status, remove listings.{% endblock %}
+{% block page_title %}Listings{% endblock %}
+
+{% block topbar_actions %}
+<span class="admin-result-count" id="listings-result-count">
+    {{ total }} listing{{ 's' if total != 1 else '' }}
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <!-- ── Toolbar: search + status filter ──────────────────── -->
+    <form class="admin-toolbar" method="GET" action="{{ url_for('admin.listings') }}" id="listings-filter-form">
+        <div class="admin-search-wrap">
+            <svg class="admin-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+                type="search"
+                name="q"
+                value="{{ search }}"
+                class="admin-search-input"
+                placeholder="Search by title, seller, or category…"
+                id="listings-search-input"
+                autocomplete="off"
+            >
+        </div>
+
+        <select name="status" class="admin-filter-select" id="listings-status-filter" onchange="this.form.submit()">
+            <option value=""         {% if not status_filter %}selected{% endif %}>All statuses</option>
+            <option value="active"   {% if status_filter == 'active'   %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+        </select>
+
+        <button type="submit" class="btn btn-secondary" id="listings-search-btn">Search</button>
+
+        {% if search or status_filter %}
+        <a href="{{ url_for('admin.listings') }}" class="admin-clear-filter" id="listings-clear-filter">Clear</a>
+        {% endif %}
+    </form>
+
+    <!-- ── Table ─────────────────────────────────────────────── -->
+    {% if admin_listings %}
+    <div class="admin-table-wrap">
+        <table class="admin-table" id="listings-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Seller</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Listed</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in admin_listings %}
+                <tr class="admin-row" id="listing-row-{{ p.id }}">
+
+                    <td class="admin-cell-title">{{ p.title }}</td>
+                    <td class="admin-cell-secondary">{{ p.sellerName }}</td>
+                    <td class="admin-cell-secondary">{{ p.category }}</td>
+                    <td class="admin-cell-num">R {{ "%.2f"|format(p.price) }}</td>
+                    <td class="admin-cell-num {% if p.stock == 0 %}admin-cell-zero{% endif %}">{{ p.stock }}</td>
+
+                    <!-- Status badge + toggle form -->
+                    <td>
+                        <form
+                            method="POST"
+                            action="{{ url_for('admin.listing_toggle', listing_id=p.id) }}"
+                            id="toggle-form-{{ p.id }}"
+                            style="display:inline;"
+                        >
+                            <input type="hidden" name="q"             value="{{ search }}">
+                            <input type="hidden" name="status_filter" value="{{ status_filter }}">
+                            <input type="hidden" name="page"          value="{{ page }}">
+                            <button
+                                type="submit"
+                                class="admin-badge admin-badge-btn {% if p.status == 'active' %}admin-badge-ok{% else %}admin-badge-neutral{% endif %}"
+                                id="toggle-btn-{{ p.id }}"
+                                title="Click to set {{ 'inactive' if p.status == 'active' else 'active' }}"
+                            >{{ p.status }}</button>
+                        </form>
+                    </td>
+
+                    <td class="admin-date">{{ p.createdAt | date }}</td>
+
+                    <!-- Delete (two-step) -->
+                    <td>
+                        <div class="admin-delete-group" id="del-grp-{{ p.id }}">
+                            <button
+                                type="button"
+                                class="admin-btn admin-btn-danger-sm"
+                                data-delete-trigger
+                                id="del-btn-{{ p.id }}"
+                            >Delete</button>
+                            <div class="admin-delete-confirm" hidden id="del-confirm-{{ p.id }}">
+                                <span class="admin-delete-msg">Sure?</span>
+                                <form method="POST" action="{{ url_for('admin.listing_delete', listing_id=p.id) }}">
+                                    <input type="hidden" name="q"             value="{{ search }}">
+                                    <input type="hidden" name="status_filter" value="{{ status_filter }}">
+                                    <input type="hidden" name="page"          value="{{ page }}">
+                                    <button type="submit" class="admin-btn admin-btn-danger-sm" id="del-yes-{{ p.id }}">Yes</button>
+                                </form>
+                                <button type="button" class="admin-btn admin-btn-ghost-sm" data-delete-cancel id="del-no-{{ p.id }}">No</button>
+                            </div>
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── Pagination ───────────────────────────────────────── -->
+    {% if total_pages > 1 %}
+    <div class="pagination" id="listings-pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('admin.listings', q=search, status=status_filter, page=page-1) }}" class="pagination-btn" id="listings-prev-btn">&larr; Previous</a>
+        {% else %}
+        <span class="pagination-btn" style="opacity:.3; cursor:default;">&larr; Previous</span>
+        {% endif %}
+
+        <span class="pagination-info">Page {{ page }} of {{ total_pages }}</span>
+
+        {% if page < total_pages %}
+        <a href="{{ url_for('admin.listings', q=search, status=status_filter, page=page+1) }}" class="pagination-btn" id="listings-next-btn">Next &rarr;</a>
+        {% else %}
+        <span class="pagination-btn" style="opacity:.3; cursor:default;">Next &rarr;</span>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state" id="listings-empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+        <p class="empty-state-title">No listings found</p>
+        <p class="empty-state-body">Try a different search term or clear the filters.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    document.querySelectorAll("[data-delete-trigger]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var grp = this.closest(".admin-delete-group");
+            this.hidden = true;
+            grp.querySelector(".admin-delete-confirm").hidden = false;
+        });
+    });
+    document.querySelectorAll("[data-delete-cancel]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var grp = this.closest(".admin-delete-group");
+            grp.querySelector("[data-delete-trigger]").hidden = false;
+            grp.querySelector(".admin-delete-confirm").hidden = true;
+        });
+    });
+})();
+</script>
+{% endblock %}

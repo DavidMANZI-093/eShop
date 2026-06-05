@@ -28,6 +28,7 @@ def create_app():
 
     from src.auth.routes     import auth_bp
     from src.buyer.routes    import buyer_bp
+    from src.admin.routes    import admin_bp
     from src.dashboard.routes import dashboard_bp
     from src.seller.routes   import seller_bp
 
@@ -35,6 +36,7 @@ def create_app():
     app.register_blueprint(dashboard_bp,  url_prefix="/dashboard")
     app.register_blueprint(seller_bp,     url_prefix="/seller")
     app.register_blueprint(buyer_bp,      url_prefix="/buyer")
+    app.register_blueprint(admin_bp,      url_prefix="/admin")
 
     @app.route("/")
     def landing():
@@ -80,6 +82,17 @@ def create_app():
             placeholder_img = settings.DEFAULT_PRODUCT_IMAGE,
             year            = date.today().year,
         )
+
+    # ── Template filter: format dates regardless of type (str vs datetime) ──
+    @app.template_filter("date")
+    def _date_filter(value, fmt="%b %d, %Y"):
+        if value is None:
+            return "—"
+        if hasattr(value, "strftime"):
+            return value.strftime(fmt)
+        # Fallback: value is a string — take the date part
+        s = str(value)
+        return s[:10] if len(s) >= 10 else s
 
     # Inject cart_count into every template so the sidebar badge always works.
     @app.context_processor

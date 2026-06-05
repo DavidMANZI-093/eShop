@@ -73,7 +73,7 @@ def seller():
 @login_required
 @role_required("admin")
 def admin():
-    return render_template("dashboard/admin.html", **_user_context())
+    return redirect(url_for("admin.overview"))
 
 
 # ── Profile ───────────────────────────────────────────────────────────────────

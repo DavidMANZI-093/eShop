@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Overview — eShop{% endblock %}
+{% block meta_description %}eShop admin panel overview — platform statistics and recent activity.{% endblock %}
+{% block page_title %}Overview{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+
+    <!-- ── Stats strip ──────────────────────────────────────── -->
+    <div class="stats-strip" id="admin-stats-strip">
+
+        <div class="stat-card">
+            <div class="stat-card-value">{{ stats.total_users }}</div>
+            <div class="stat-card-label">Total users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-value">{{ stats.buyers }}</div>
+            <div class="stat-card-label">Buyers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-value">{{ stats.sellers }}</div>
+            <div class="stat-card-label">Sellers</div>
+        </div>
+        <div class="stat-card stat-card-active">
+            <div class="stat-card-value">{{ stats.products_active }}</div>
+            <div class="stat-card-label">Active listings</div>
+        </div>
+        <div class="stat-card stat-card-inactive">
+            <div class="stat-card-value">{{ stats.products_inactive }}</div>
+            <div class="stat-card-label">Inactive listings</div>
+        </div>
+
+    </div>
+
+    <!-- ── Two-column preview ────────────────────────────────── -->
+    <div class="admin-preview-row">
+
+        <!-- Recent users -->
+        <section class="admin-panel" aria-labelledby="recent-users-heading">
+            <div class="admin-panel-header">
+                <h2 class="admin-panel-title" id="recent-users-heading">Recent users</h2>
+                <a href="{{ url_for('admin.users') }}" class="admin-panel-link" id="view-all-users-link">View all</a>
+            </div>
+            {% if recent_users %}
+            <table class="admin-table" id="recent-users-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Verified</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in recent_users %}
+                    <tr>
+                        <td>
+                            <div class="admin-user-cell">
+                                <span class="admin-user-name">{{ u.userName }}</span>
+                                <span class="admin-user-email">{{ u.email }}</span>
+                            </div>
+                        </td>
+                        <td><span class="role-badge role-badge-{{ u.role }}">{{ u.role }}</span></td>
+                        <td>
+                            {% if u.googleId %}
+                            <span class="admin-badge admin-badge-google">Google</span>
+                            {% elif u.emailVerified %}
+                            <span class="admin-badge admin-badge-ok">Verified</span>
+                            {% else %}
+                            <span class="admin-badge admin-badge-warn">Unverified</span>
+                            {% endif %}
+                        </td>
+                        <td class="admin-date">{{ u.createdAt | date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p class="empty-state-body">No users yet.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Recent listings -->
+        <section class="admin-panel" aria-labelledby="recent-listings-heading">
+            <div class="admin-panel-header">
+                <h2 class="admin-panel-title" id="recent-listings-heading">Recent listings</h2>
+                <a href="{{ url_for('admin.listings') }}" class="admin-panel-link" id="view-all-listings-link">View all</a>
+            </div>
+            {% if recent_listings %}
+            <table class="admin-table" id="recent-listings-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Seller</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in recent_listings %}
+                    <tr>
+                        <td class="admin-cell-title">{{ p.title }}</td>
+                        <td class="admin-cell-secondary">{{ p.sellerName }}</td>
+                        <td class="admin-cell-num">R {{ "%.2f"|format(p.price) }}</td>
+                        <td>
+                            <span class="admin-badge admin-badge-{{ 'ok' if p.status == 'active' else 'neutral' }}">
+                                {{ p.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p class="empty-state-body">No listings yet.</p>
+            </div>
+            {% endif %}
+        </section>
+
+    </div>
+
+</div>
+{% endblock %}
