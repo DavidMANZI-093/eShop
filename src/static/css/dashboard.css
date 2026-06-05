@@ -206,6 +206,12 @@
     color: var(--color-text-primary);
 }
 
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
 .main-body {
     flex: 1;
     padding: var(--space-6) var(--space-5);

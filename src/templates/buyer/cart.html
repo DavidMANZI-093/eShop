@@ -96,7 +96,6 @@
                             class="cart-qty-btn"
                             data-cart-action="decrease"
                             aria-label="Decrease"
-                            {% if item.quantity <= 1 %}disabled{% endif %}
                         >&minus;</button>
                         <span class="cart-qty-value">{{ item.quantity }}</span>
                         <button

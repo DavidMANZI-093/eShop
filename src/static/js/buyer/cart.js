@@ -146,8 +146,9 @@
     }
 
     function syncDecreaseBtn(row, qty) {
-        var btn = row.querySelector("[data-cart-action='decrease']");
-        if (btn) btn.disabled = qty <= 1;
+        // The decrease button is never disabled — at qty=1 the handler
+        // calls removeRow, so the button is always usable.
+        void qty; // unused parameter kept for clarity
     }
 
     function syncIncreaseBtn(row, qty, stock) {

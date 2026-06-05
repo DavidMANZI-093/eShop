@@ -645,3 +645,21 @@
     color: hsl(38 50% 60%);
     line-height: 1.5;
 }
+
+/* ── Clear-cart topbar group ─────────────────────────────── */
+
+.clear-cart-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.clear-confirm-group {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.clear-confirm-group.is-visible {
+    display: flex;
+}
